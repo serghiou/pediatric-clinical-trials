@@ -298,6 +298,7 @@ treemaps %<>%
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
     n_studies = sum(!is.na(n_sample)),
+    n_complete_only = sum(str_detect(status_june23_sc, "C"), na.rm = T),
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
   ) %>% 
@@ -335,7 +336,7 @@ treemaps %>%
 ```
 
 
-## Plot without enrollment
+## Plot
 
 ```{r}
 # Create palette
@@ -386,7 +387,7 @@ ggsave("../../output/figure_output/treemaps_level-three.jpg")
 ```
 
 
-## Plot with enrollment
+## Plot - Enrollment
 
 ```{r}
 # Create palette
@@ -443,9 +444,60 @@ treemaps %>%
   # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
   
 # Save
-ggsave("../../output/figure_output/treemaps_level-three_enrollment.jpg")
+ggsave("../../output/figure_output/treemaps_level-three_enrollment_chosen.jpg")
 ```
 
+
+## Plot - Completed
+
+```{r}
+# Create palette
+colfunc <- colorRampPalette(c("red", "yellow", "green"))
+
+# Plot
+treemaps %>%
+  mutate(sample_size = if_else(n_complete_only > 0, sample_size, 0)) %>% 
+  mutate_at(vars(sample_size), na_if, 0) %>% 
+  ggplot(aes(
+    area = dalys, 
+    fill = sample_size,
+    label = level_three,
+    subgroup = level_two,
+  ), color = "white") +
+  geom_treemap(color = "white", size = 1) +
+  geom_treemap_text(
+    colour = "grey20", 
+    place = "centre", 
+    grow = F, 
+    reflow = T, 
+    min.size = 1,
+    padding.x = unit(2, units = "mm"),
+    padding.y = unit(2, units = "mm"),
+  ) +
+  geom_treemap_subgroup_border(color = "white", size = 5) +
+  labs(fill = "Total sample") +
+  theme(legend.title = element_text(vjust = 2)) +
+  scale_fill_gradient(
+    low = "#F2DF91",
+    high = "#CE0A04",
+    na.value = "grey90",
+    name = "Total sample",
+    labels = scales::comma
+  )
+  # scale_fill_gradientn(
+  #   labels = scales::comma,
+  #   colours = heat.colors(10, alpha = 0.65),
+  #   na.value = "grey50"
+  # )
+  # scale_fill_distiller(palette = "Greens")
+  # scale_fill_distiller(palette = "Spectral")
+  # scale_fill_gradientn(colours = alpha(colfunc(10), 0.7))
+  # scale_fill_viridis_c(option = "B")
+  # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
+  
+# Save
+ggsave("../../output/figure_output/treemaps_level-three_completed.jpg")
+```
 
 ***
 
@@ -568,7 +620,7 @@ treemaps %>%
   # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
   
 # Save
-ggsave("../../output/figure_output/treemaps_level-three.jpg")
+ggsave("../../output/figure_output/treemaps_level-four.jpg")
 ```
 
 

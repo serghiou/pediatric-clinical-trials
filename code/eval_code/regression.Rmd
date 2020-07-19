@@ -402,7 +402,52 @@ ggsave(
 ```
 
 
-## Original with enrollment
+## Original - NB
+
+```{r}
+regression %>%
+  filter(dev == "All") %>% 
+  ggplot(aes(x = dalys, y = sample_size)) +
+  geom_point() +
+    geom_smooth(
+    method = "lm", 
+    aes(color = "LM"), 
+    formula = y ~ log(x), 
+    se = F
+  ) +
+  geom_smooth(
+    method = "glm",
+    method.args = list(family = poisson), 
+    aes(color = "poisson"), 
+    se = T
+  ) +
+  geom_smooth(method = MASS::glm.nb, aes(color = "NB"), se = F) +
+  geom_smooth(
+    method = "lm", 
+    aes(color = "LM"), 
+    formula = y ~ log(x), 
+    se = F
+  ) +
+  geom_smooth(method = "lm", formula = y ~ x, aes(color = "Original"), se = F)
+  geom_text_repel(aes(label = level_three), size = 2, segment.size = 0.2) +
+  facet_wrap(~ dev, nrow = 2) +
+  labs(x = "DALYs (millions)", y = "Total sample size") +
+  scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_y_continuous(labels = scales::comma)
+
+# Save
+ggsave(
+  "../../output/figure_output/regression_original.jpg",
+  width = 13,
+  height = 8
+)
+
+geom_smooth(method = "glm", method.args = list(family = poisson), aes(color = "poisson"), se = FALSE) +
+    geom_smooth(method = MASS::glm.nb, aes(color = "NB"), se = FALSE)
+```
+
+
+## Original - Enrollment
 
 ```{r}
 regression %>%
@@ -445,7 +490,7 @@ regression %>%
   facet_wrap(~ dev, nrow = 2) +
   labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
   scale_x_continuous(
-    trans = "log",
+    trans = "log10",
     labels = scales::unit_format(unit = "M", scale = 1e-6)
   ) +
   scale_y_continuous(
@@ -462,7 +507,7 @@ ggsave(
 ```
 
 
-## Log with enrollment
+## Log - Enrollment
 
 ```{r}
 regression %>%
@@ -477,7 +522,7 @@ regression %>%
   facet_wrap(~ dev, nrow = 2) +
   labs(color = "Complete or recruiting") +
   scale_x_continuous(
-    trans = "log",
+    trans = "log10",
     name = "Log-transformed DALYs (millions)",
     labels = scales::unit_format(unit = "M", scale = 1e-6)
   ) +
@@ -489,6 +534,95 @@ regression %>%
 # Save
 ggsave(
   "../../output/figure_output/regression_log_with-enrollment.jpg",
+  width = 13,
+  height = 8
+)
+```
+
+
+## Log - Poisson
+
+```{r}
+regression %>%
+  ggplot(aes(x = dalys, y = sample_size)) +
+  geom_point(color = scales::hue_pal()(1)) +
+  geom_smooth(
+    method = "glm",
+    method.args = list(family = quasipoisson),
+    formula = y ~ x,
+    se = T
+  ) +
+  geom_text_repel(
+    aes(label = level_three), 
+    size = 2, 
+    segment.color = "grey80",
+    segment.size = 0.1,
+    force = 50,
+    max.time = 5,
+    max.iter = 100000
+  ) +
+  facet_wrap(~ dev, nrow = 2) +
+  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  scale_x_continuous(
+    trans = "log10",
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  scale_y_continuous(
+    # trans = "log",
+    labels = scales::comma
+  ) +
+  coord_cartesian(ylim = c(-100000, 200000))
+
+# Save
+ggsave(
+  "../../output/figure_output/regression_log_poisson_chosen.jpg",
+  width = 13,
+  height = 8
+)
+```
+
+
+## Log - Poisson - Enrollment
+
+```{r}
+regression %>%
+  ggplot(aes(x = dalys, y = sample_size)) +
+  geom_point(aes(color = complete_enroll)) +
+  geom_smooth(
+    method = "glm",
+    method.args = list(family = quasipoisson),
+    formula = y ~ x,
+    se = T
+  ) +
+  geom_text_repel(
+    aes(label = level_three), 
+    size = 2,
+    segment.color = "grey80",
+    segment.size = 0.1,
+    force = 50,
+    max.time = 5,
+    max.iter = 100000
+  ) +
+  facet_wrap(~ dev, nrow = 2) +
+  scale_x_continuous(
+    trans = "log10",
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    name = "Log-transformed DALYs (millions)"
+  ) +
+  scale_y_continuous(
+    # trans = "log",
+    labels = scales::comma,
+    name = "Total sample size"
+  ) +
+  scale_color_discrete(
+    name = "Complete or recruiting", 
+    labels = c(">50%", "25-50%", "0-25%", "No studies")
+  ) +
+  coord_cartesian(ylim = c(-100000, 200000))
+
+# Save
+ggsave(
+  "../../output/figure_output/regression_log_poisson_enrollment_chosen.jpg",
   width = 13,
   height = 8
 )
