@@ -1,5 +1,5 @@
 ---
-title: 'Pediatric clinical trials: Figures'
+title: 'Pediatric clinical trials: Maps'
 author: "Stylianos Serghiou"
 date: '`r format(Sys.time(), "%d/%m/%Y")`'
 output:

@@ -402,34 +402,36 @@ ggsave(
 ```
 
 
-## Original - NB
+## Original - NB tests
 
 ```{r}
 regression %>%
   filter(dev == "All") %>% 
   ggplot(aes(x = dalys, y = sample_size)) +
   geom_point() +
-    geom_smooth(
+  geom_smooth(
     method = "lm", 
     aes(color = "LM"), 
+    formula = y ~ x, 
+    se = F
+  ) +
+  geom_smooth(
+    method = "lm", 
+    aes(color = "LM-log"), 
     formula = y ~ log(x), 
     se = F
   ) +
   geom_smooth(
     method = "glm",
     method.args = list(family = poisson), 
-    aes(color = "poisson"), 
+    aes(color = "Poisson"), 
     se = T
   ) +
-  geom_smooth(method = MASS::glm.nb, aes(color = "NB"), se = F) +
   geom_smooth(
-    method = "lm", 
-    aes(color = "LM"), 
-    formula = y ~ log(x), 
+    method = MASS::glm.nb, 
+    aes(color = "NB"), 
     se = F
   ) +
-  geom_smooth(method = "lm", formula = y ~ x, aes(color = "Original"), se = F)
-  geom_text_repel(aes(label = level_three), size = 2, segment.size = 0.2) +
   facet_wrap(~ dev, nrow = 2) +
   labs(x = "DALYs (millions)", y = "Total sample size") +
   scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
@@ -437,13 +439,10 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_original.jpg",
+  "../../output/figure_output/regression_original_nb.jpg",
   width = 13,
   height = 8
 )
-
-geom_smooth(method = "glm", method.args = list(family = poisson), aes(color = "poisson"), se = FALSE) +
-    geom_smooth(method = MASS::glm.nb, aes(color = "NB"), se = FALSE)
 ```
 
 
@@ -472,7 +471,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_original_with-enrollment.jpg",
+  "../../output/figure_output/regression_original_enrollment.jpg",
   width = 13,
   height = 8
 )
@@ -533,7 +532,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_log_with-enrollment.jpg",
+  "../../output/figure_output/regression_log_enrollment.jpg",
   width = 13,
   height = 8
 )

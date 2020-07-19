@@ -330,7 +330,7 @@ Inspect levels with 0-50% enrollment.
 ```{r}
 treemaps %>% 
   filter(complete_enroll %in% c("25-50%", "0-25%")) %>% 
-  select(3:8) %>%
+  select(3:9) %>%
   arrange(complete_enroll) %>% 
   sable()
 ```
@@ -496,7 +496,7 @@ treemaps %>%
   # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
   
 # Save
-ggsave("../../output/figure_output/treemaps_level-three_completed.jpg")
+ggsave("../../output/figure_output/treemaps_level-three_completed_chosen.jpg")
 ```
 
 ***
@@ -570,7 +570,8 @@ treemaps %>%
   sable()
 ```
 
-## Plot without enrollment
+
+## Plot
 
 ```{r}
 # Create palette
@@ -624,7 +625,7 @@ ggsave("../../output/figure_output/treemaps_level-four.jpg")
 ```
 
 
-## Plot with enrollment
+## Plot - Enrollment
 
 ```{r}
 # Create palette

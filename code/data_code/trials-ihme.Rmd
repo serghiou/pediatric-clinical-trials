@@ -232,7 +232,7 @@ library(tidyverse)
 
 # Import data
 trials <- read_excel(
-  "../../data/interim_data/categorizations_07112020_conditions.xlsx",
+  "../../data/interim_data/categorizations_07192020_conditions.xlsx",
   sheet = 1
 )
 ```
@@ -245,8 +245,6 @@ trials <- read_excel(
 
 ```{r}
 trials %<>%
-  rename(brief_summary = brief_summary...6) %>% 
-  select(-brief_summary...66) %>% 
   drop_na(nct_id)
 ```
 
