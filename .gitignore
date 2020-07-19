@@ -2,9 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-data/external_data
-data/interim_data
-data/raw_data
-code/data_code
-code/eval_code
-output
+# data/external_data
+# data/interim_data
+# data/raw_data
+# code/data_code
+# code/eval_code
+# output

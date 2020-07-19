@@ -1,0 +1,465 @@
+---
+title: 'Clinical Trials: Identify pediatric trials'
+author: "Stylianos Serghiou"
+date: '`r format(Sys.time(), "%d/%m/%Y")`'
+output:
+  prettydoc::html_pretty:
+    # no code_folding available
+    theme: hpstr      # or: architect; https://github.com/yixuan/prettydoc
+    highlight: github # or: vignette
+    toc: TRUE         # no toc_float available
+    df_print: kable   # obviates %>% kable; does not replace styling though
+  tufte::tufte_handout: default
+  pdf_document:
+    highlight: tango
+    df_print: kable
+    latex_engine: pdflatex
+    keep_tex: yes
+  rmdformats::readthedown:
+    highlight: kate
+    df_print: kable    # obviates %>% kable; does not replace styling though
+    code_folding: hide # or: show; (comment out to not give option)
+  tufte::tufte_html: 
+    toc: TRUE
+  epuRate::epurate:
+    df_print: kable
+    toc: yes
+  html_document:
+    highlight: tango
+    theme: sandstone
+    df_print: kable
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
+    css: "path_to_custom.css"
+header-includes:
+- \DeclareUnicodeCharacter{3B8}{~}
+- \DeclareUnicodeCharacter{3B1}{~}
+- \DeclareUnicodeCharacter{3B2}{~}
+- \DeclareUnicodeCharacter{223C}{~}
+- \DeclareUnicodeCharacter{2264}{~}
+- \DeclareUnicodeCharacter{2265}{~}
+- \DeclareUnicodeCharacter{2581}{~}
+- \DeclareUnicodeCharacter{2582}{~}
+- \DeclareUnicodeCharacter{2583}{~}
+- \DeclareUnicodeCharacter{2585}{~}
+- \DeclareUnicodeCharacter{2586}{~}
+- \DeclareUnicodeCharacter{2587}{~} 
+- \DeclareUnicodeCharacter{FB00}{~} 
+- \usepackage{graphicx}
+editor_options: 
+  chunk_output_type: inline
+---
+
+<style>
+p {
+
+text-align: justify;
+text-justify: interword;
+padding: 0 0 0.5em 0
+
+}
+</style>
+
+```{r, echo=FALSE}
+# Load packages
+library(knitr)
+library(rmdformats)
+library(kableExtra)
+library(ggplot2)
+library(magrittr)
+
+
+
+######### knitr
+
+# Define chunk options
+opts_chunk$set(echo = TRUE
+               , cache     = FALSE      # if TRUE, no need to rerun chunks
+               #, cache.lazy = TRUE     # use when have big objects (>1 GB)
+               , cache.comments = FALSE # do not rebuild if comments change
+               , tidy      = FALSE      # can play with this
+               , warning   = FALSE 
+               , message   = FALSE
+               , comment   = NA
+               , fig.align = "center"
+               , fig.width = 7
+               # , fig.path  = "Figs/" # export all figures to dir Figs
+               , linewidth = 91)
+
+opts_knit$set(width = 75)
+
+# Initiatialize hook
+hook_output = knit_hooks$get("output")
+
+# Hook to wrap output text when it exceeds 'n' using linewidth
+knit_hooks$set(output = function(x, options) {
+  
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    
+    # wrap lines wider than 'n' 
+    if (any(nchar(x) > n)) 
+      x <- strwrap(x, width = n)
+      x <- paste(x, collapse = "\n")
+  }
+  hook_output(x, options)
+})
+
+# For more knitr options visit: https://yihui.name/knitr/options/
+# and his github page: https://github.com/yihui/knitr-examples
+
+
+
+######### kableExtra
+
+options(knitr.kable.NA = ''  # replace NAs in tables with blank
+        , digits = 3)          # round digits (doesn't work without this here!)
+
+## Example use
+# data.frame(x = c(1,2,3), y = c(4,5,6), z = c(7,8,9)) %>% 
+#   kable(booktabs = T) %>% kable_styling()
+
+# Function to simplify table styling
+sable <- function(tab, escape = T, full_width = F, drop = F, font_size = 12) {
+  if (drop) {
+    tab %>%
+      kable(escape = escape, booktabs = T) %>%
+      collapse_rows(valign = "top") %>% 
+      kable_styling("striped", 
+                    position = "center", 
+                    full_width = full_width, 
+                    font_size = font_size)
+  } else {
+    tab %>%
+      kable(escape = escape, booktabs = T) %>%
+      kable_styling("striped", 
+                    position = "center", 
+                    full_width = full_width,
+                    font_size = font_size)
+  }
+}
+
+## Guidelines
+# No longer need to define options(knitr.table.format = "html"). It is now automatically done as soon as you load kableExtra
+# No need to run kable() every time - done automatically as soon as you load kableExtra
+# Loading kableExtra nullifies any styling applied by df_table: kable in the preamble - if you are content with standard formatting, DO NOT load kableExtra
+
+
+
+#########  ggplot2
+
+# Set up preferred theme in ggplot2
+my_theme <- 
+  # this and theme_minimal() are my favorite
+  theme_light() +  
+  theme(
+    text  = element_text(color = "grey20"),
+    title = element_text(face = "bold"),
+    legend.key   = element_rect(colour = NA, fill = NA),  # Avoid borders
+    axis.text.x  = element_text(margin = ggplot2::margin(b = 10)),
+    axis.text.y  = element_text(margin = ggplot2::margin(l = 10))
+  )
+
+# Make the above theme the default theme
+original_theme <- theme_set(my_theme)
+
+# Use ggsave to save plots after plotting - this reduces size dramatically
+
+
+
+
+######### Tabbed sections
+
+# You can organize content using tabs by applying the .tabset class attribute to headers within a document. This will cause all sub-headers of the header with the .tabset attribute to appear within tabs rather than as standalone sections. For example:
+
+## Quarterly Results {.tabset}
+
+### By Product
+
+
+
+######### Update package
+
+# To update the package use:
+# Replace ~/serghiouTemplates/inst/rmarkdown/templates/report/skeleton.rmd
+# library(devtools); setwd("/Users/Stelios/"); install("serghiouTemplates")
+```
+
+# Introduction
+
+## Objectives
+
+1. Download all relevant data from ClinicalTrials.gov
+2. Create the required dataset.
+
+
+# Setup
+
+```{r}
+# Load packages
+library(tidyverse)
+library(tidymodels)
+library(magrittr)
+library(readxl)
+library(clinicaltrialr)
+library(pbapply)
+```
+
+
+***
+
+# Download data
+
+## Download all clinical trials
+
+Guidance on how to do this was taken from [here](https://www.clinicaltrials.gov/ct2/resources/download#DownloadAllData). I learned how to set up the query by using the [Advanced Search](https://www.clinicaltrials.gov/ct2/search/advanced) option of the website. The results page of the search being downloaded can be found [here](https://www.clinicaltrials.gov/ct2/results?type=Intr&age=0). First, I downloaded all ~45,000 interventional pediatric trials (0-17 years old) manually by using the following links:
+
+- https://www.clinicaltrials.gov/ct2/download_fields?type=Intr&age=0&down_count=10000&down_fmt=csv&down_flds=all&down_chunk=1
+
+- https://www.clinicaltrials.gov/ct2/download_fields?type=Intr&age=0&down_count=10000&down_fmt=csv&down_flds=all&down_chunk=2
+
+- https://www.clinicaltrials.gov/ct2/download_fields?type=Intr&age=0&down_count=10000&down_fmt=csv&down_flds=all&down_chunk=3
+
+- https://www.clinicaltrials.gov/ct2/download_fields?type=Intr&age=0&down_count=10000&down_fmt=csv&down_flds=all&down_chunk=4
+
+- https://www.clinicaltrials.gov/ct2/download_fields?type=Intr&age=0&down_count=10000&down_fmt=csv&down_flds=all&down_chunk=5
+
+The data were downloaded on 9 Jan 2020.
+
+
+## Download all vaccine trials
+
+The search was done on 9 Jan 2020 and the results can be found [here](https://www.clinicaltrials.gov/ct2/results?type=Intr&age=0&intr=Vaccines). The results were downloaded using the following URL:
+
+- https://www.clinicaltrials.gov/ct2/download_fields?type=Intr&age=0&intr=Vaccines&down_count=10000&down_fmt=csv&down_flds=all
+
+
+***
+
+
+# Data preparation
+
+Import datasets.
+
+```{r}
+# Import pediatric trials
+paed_names <- list.files("../Data/", pattern = "[0-9].csv", full.names = T)
+paed <- map_df(paed_names, read_csv)
+dim(paed)
+```
+
+```{r}
+# Import vaccine trials
+vaccine <- read_csv("../Data/clinicaltrials-pediatric-vaccine.csv")
+dim(vaccine)
+```
+
+Remove vaccine trials from pediatric trials.
+
+```{r}
+ct <- anti_join(paed, vaccine, by = c("URL" = "URL"))
+```
+
+Separate the `Study Design` column into subcolumns.
+
+```{r}
+ct %<>% 
+  separate(
+    col = `Study Designs`, 
+    sep = "\\|", 
+    into = c("Allocation", "Intervention_Model", "Masking", "Primary_Purpose"),
+    fill = "left"
+  ) %>% 
+  mutate_at(vars(Allocation:Primary_Purpose), str_replace, "^.+: ", "")
+```
+
+Exclude the following: (a) non-randomized, (b) mentions of "cluster randomized" in title and (c) enrolled < 1000. Note that records with missing data on randomization and enrollment count were retained.
+
+```{r}
+count(ct, Allocation) %>% sable()
+```
+
+```{r}
+count(ct, isCluster = grepl("cluster rand", Title, ignore.case = T)) %>% sable()
+```
+
+Look at enrollment. Enrollment here refers to estimated enrollment (i.e. the participant target enrollment set by the researchers) when the trial is not yet recruiting or is ongoing (as per its "status") and actual enrollment (i.e the actual number of participants) when the trial is completed (as per its "status").
+
+```{r}
+count(ct, Enrollment > 1000) %>% sable()
+```
+
+```{r}
+# Create dataframe
+ct %<>% 
+  filter(Allocation %in% c("Randomized", NA)) %>% 
+  filter(!grepl("cluster rand", Title, ignore.case = T)) %>% 
+  filter(Enrollment > 999 | is.na(Enrollment))
+
+# Dimensions
+dim(ct)
+```
+
+Export.
+
+```{r}
+write_csv(ct, "../../data/interim_data/clinicaltrials_non-vaccine_trials.csv")
+```
+
+
+***
+
+
+# Full records
+
+Test.
+
+```{r}
+test_trial <- "https://clinicaltrials.gov/ct2/show/NCT04222998?displayxml=true"
+xml_document <- xml2::read_xml(test_trial)
+```
+
+Retrieve full records.
+
+```{r}
+get_trials <- function(NCT) {
+  
+  NCT %>% 
+    clinicaltrialr::get_xml_document() %>% 
+    clinicaltrialr::extract_fields()
+  
+}
+```
+
+```{r, eval=FALSE}
+trials <- pblapply(ct$`NCT Number`, get_trials, cl = 8)
+trials_db <- do.call(dplyr::bind_rows, trials)
+```
+
+The above gave me an error because one of the cores failed. This led to a few entries of the least being inappropriate. I handled this error using the following code.
+
+```{r, eval=FALSE}
+missing_index <- grep("Error in open", trials)
+missing_nct <- ct$`NCT Number`[missing_index]
+missing_doc <- pblapply(missing_nct, get_trials, cl = 8)
+trials[missing_index] <- missing_doc
+trials_db <- do.call(dplyr::bind_rows, trials)
+```
+
+Identify mentions of "cluster".
+
+```{r, eval=FALSE}
+trials_db %<>% 
+  mutate(
+    cluster_1 = grepl("cluster", brief_summary, ignore.case = T),
+    cluster_2 = grepl("cluster", detailed_description, ignore.case = T),
+    cluster_3 = grepl("cluster", publications_reference, ignore.case = T),
+    mentions_cluster = cluster_1 | cluster_2 | cluster_3
+  ) %>% 
+  select(-cluster_1, -cluster_2, -cluster_3)
+```
+
+Identify mentions of "communit*" and "village, school, house".
+
+```{r}
+# TODO: mortality/death/survival as primary or secondary outcome
+# TODO: overall survival, quality of life
+```
+
+Identify mentions of community, village, school or house.
+
+```{r}
+cluster_other <- "community(|ies)|village(|s)\\b|school(|s)\\b|house(|s)"
+
+trials_db %<>% 
+  mutate(
+    cluster_1 = grepl(cluster_other, brief_summary, ignore.case = T),
+    cluster_2 = grepl(cluster_other, detailed_description, ignore.case = T),
+    cluster_3 = grepl(cluster_other, publications_reference, ignore.case = T),
+    mentions_community = cluster_1 | cluster_2 | cluster_3
+  ) %>% 
+  select(-cluster_1, -cluster_2, -cluster_3)
+```
+
+Identify mentions of mortality/death/survival as primary or secondary outcome
+
+```{r}
+mortality <- "[Mm]ortality|[Dd]eath(|s)\\b|[Dd]ied|[Ss]urviv(al|ed)"
+
+trials_db %<>% 
+  mutate(
+    mortality_1 = grepl(mortality, primary_outcome_description),
+    mortality_2 = grepl(mortality, primary_outcome_measure),
+    mentions_mortality_primary = mortality_1 | mortality_2
+  ) %>% 
+  select(-mortality_1, -mortality_2)
+
+trials_db %<>% 
+  mutate(
+    mortality_1 = grepl(mortality, secondary_outcome_description),
+    mortality_2 = grepl(mortality, secondary_outcome_measure),
+    mentions_mortality_secondary = mortality_1 | mortality_2
+  ) %>% 
+  select(-mortality_1, -mortality_2)
+```
+
+Doing the following to capture some fields that were not captured by the initial code by merging.
+
+```{r}
+a <- full_join(trials_db, ct, by = c("nct_id" = "NCT Number"))
+a$status <- a$Status
+a$study_results <- a$`Study Results`
+a$age <- a$Age
+a$gender <- a$Gender
+a$start_date <- a$`Start Date`
+a$funding <- a$`Funded Bys`
+a$completion_date <- a$`Completion Date`
+a$enrollment_estimated <- a$Enrollment
+a %<>% 
+  select(nct_id:mentions_community, URL:enrollment_estimated) %>% 
+  select(nct_id:maximum_age, enrollment_estimated, enrollment_actual, everything())
+```
+
+This contains characters that throw off `write_csv()`. This is why I am using the following function, which uses ";" as its delimiter. To import this properly into Excel, open an empty sheet, go to the Data tab, select import from text and in the Wizard choose the semi-colon (leave the treat consecutive delimiters as one box unchecked).
+
+```{r, eval=FALSE}
+write_excel_csv2(
+  a, 
+  "../..data/interim_data/clinicaltrials_non-vaccine_trials_all-records_.csv"
+)
+```
+
+
+
+***
+
+
+
+# Save
+
+```{r save}
+# Save
+save(list = ls(), file = "clinicaltrials.RData")
+```
+
+
+
+***
+
+
+
+# Documentation {.tabset}
+
+## Session Info
+
+```{r session_info, echo=FALSE}
+print(sessionInfo(), locale = F)
+```
+
+
+## References
+
+```{r refs, echo=FALSE}
+(.packages()) %>% sort %>% lapply(citation) %>% lapply(c) %>% unique
+```
