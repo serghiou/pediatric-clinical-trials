@@ -226,6 +226,7 @@ original_theme <- theme_set(my_theme)
 
 ```{r setup_2}
 # Load packages
+library(ggrepel)
 library(magrittr)
 library(tidyverse)  # load last to avoid masking by others
 library(treemapify)
@@ -343,16 +344,18 @@ heat_map %>%
   filter(region != "Antarctica") %>%
   ggplot(aes(x = long, y = lat)) +
   geom_polygon(aes(group = group, fill = sample_size), alpha = 0.9) +
-  # geom_text(
-  #   data = world_centroids, 
-  #   aes(x = centroid_long, y = centroid_lat, label = region),
-  #   size = 1
-  # ) +
   geom_text(
-    data = country_centroids,
-    aes(x = longitude, y = latitude, label = region),
+    data = world_centroids,
+    aes(x = centroid_long, y = centroid_lat, label = region),
     size = 1
   ) +
+  # geom_text_repel(
+  #   data = country_centroids,
+  #   aes(x = longitude, y = latitude, label = region),
+  #   size = 1,
+  #   force = 0.001,
+  #   segment.color = NA
+  # ) +
   # geom_text_repel(
   #   data = country_centroids,force = 0.01,
   #   segment.size = 0.1,

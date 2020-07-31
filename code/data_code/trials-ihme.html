@@ -163,7 +163,7 @@ code span.ot { color: #007020; }
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Pediatric clinical trials: Prepare trial data for analysis</h1>
 <h3 class="author">Stylianos Serghiou</h3>
-<h3 class="date">19/07/2020</h3>
+<h3 class="date">27/07/2020</h3>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -215,7 +215,13 @@ padding: 0 0 0.5em 0
 <div id="general" class="section level1">
 <h1>General</h1>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>trials <span class="op">%&lt;&gt;%</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="st">  </span><span class="kw">drop_na</span>(nct_id)</span></code></pre></div>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="st">  </span><span class="kw">drop_na</span>(nct_id) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="st">  </span><span class="kw">rename</span>(</span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="dt">brief_summary =</span> <span class="st">`</span><span class="dt">brief_summary...6</span><span class="st">`</span>,</span>
+<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">ihmelevel3C_code =</span> <span class="st">`</span><span class="dt">ihmelevel3C _code</span><span class="st">`</span>,</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="dt">ihmelevel3D_code =</span> <span class="st">`</span><span class="dt">...23</span><span class="st">`</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="st">`</span><span class="dt">Email_Y (Reply Y/N)</span><span class="st">`</span>)</span></code></pre></div>
 <hr />
 </div>
 <div id="eligibility" class="section level1">
@@ -248,25 +254,28 @@ padding: 0 0 0.5em 0
 <span id="cb5-4"><a href="#cb5-4"></a>    <span class="dt">who_level_three =</span> level3_split_categories_sc,</span>
 <span id="cb5-5"><a href="#cb5-5"></a>    <span class="dt">who_level_four =</span> level4_split_categories_sc,</span>
 <span id="cb5-6"><a href="#cb5-6"></a>    <span class="dt">who_level_four_five =</span> sc_multiplecategoryconditions_GBD_final</span>
-<span id="cb5-7"><a href="#cb5-7"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb5-8"><a href="#cb5-8"></a><span class="st">  </span><span class="kw">unite</span>(</span>
-<span id="cb5-9"><a href="#cb5-9"></a>    <span class="dt">col =</span> <span class="st">&quot;ihme_level_four&quot;</span>, </span>
-<span id="cb5-10"><a href="#cb5-10"></a>    ihmelevel4A_code<span class="op">:</span>ihmelevel4E_code, </span>
-<span id="cb5-11"><a href="#cb5-11"></a>    <span class="dt">sep =</span> <span class="st">&quot;; &quot;</span>, </span>
-<span id="cb5-12"><a href="#cb5-12"></a>    <span class="dt">na.rm =</span> T</span>
-<span id="cb5-13"><a href="#cb5-13"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb5-14"><a href="#cb5-14"></a><span class="st">  </span><span class="kw">unite</span>(</span>
-<span id="cb5-15"><a href="#cb5-15"></a>    <span class="dt">col =</span> <span class="st">&quot;ihme_level_three&quot;</span>,  </span>
-<span id="cb5-16"><a href="#cb5-16"></a>    ihmelevel3A_code<span class="op">:</span>ihmelevel3B_code, </span>
-<span id="cb5-17"><a href="#cb5-17"></a>    <span class="dt">sep =</span> <span class="st">&quot;; &quot;</span>,</span>
-<span id="cb5-18"><a href="#cb5-18"></a>    <span class="dt">na.rm =</span> T</span>
-<span id="cb5-19"><a href="#cb5-19"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb5-20"><a href="#cb5-20"></a><span class="st">  </span><span class="kw">select</span>(</span>
-<span id="cb5-21"><a href="#cb5-21"></a>    nct_id<span class="op">:</span>is_classified, </span>
-<span id="cb5-22"><a href="#cb5-22"></a>    who_level_three, who_level_four, who_level_four_five,</span>
-<span id="cb5-23"><a href="#cb5-23"></a>    ihme_level_three, ihme_level_four,</span>
-<span id="cb5-24"><a href="#cb5-24"></a>    <span class="kw">everything</span>()</span>
-<span id="cb5-25"><a href="#cb5-25"></a>  )</span></code></pre></div>
+<span id="cb5-7"><a href="#cb5-7"></a>  ) <span class="op">%&gt;%</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="kw">across</span>(ihmelevel4A_code<span class="op">:</span>ihmelevel4E_code, na_if, <span class="st">&quot;unclassified&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="st">  </span><span class="kw">unite</span>(</span>
+<span id="cb5-10"><a href="#cb5-10"></a>    <span class="dt">col =</span> <span class="st">&quot;ihme_level_four&quot;</span>, </span>
+<span id="cb5-11"><a href="#cb5-11"></a>    ihmelevel4A_code<span class="op">:</span>ihmelevel4E_code, </span>
+<span id="cb5-12"><a href="#cb5-12"></a>    <span class="dt">sep =</span> <span class="st">&quot;; &quot;</span>, </span>
+<span id="cb5-13"><a href="#cb5-13"></a>    <span class="dt">na.rm =</span> T</span>
+<span id="cb5-14"><a href="#cb5-14"></a>  ) <span class="op">%&gt;%</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="kw">across</span>(ihmelevel3A_code<span class="op">:</span>ihmelevel3D_code, na_if, <span class="st">&quot;unclassified&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-16"><a href="#cb5-16"></a><span class="st">  </span><span class="kw">unite</span>(</span>
+<span id="cb5-17"><a href="#cb5-17"></a>    <span class="dt">col =</span> <span class="st">&quot;ihme_level_three&quot;</span>,  </span>
+<span id="cb5-18"><a href="#cb5-18"></a>    ihmelevel3A_code<span class="op">:</span>ihmelevel3D_code, </span>
+<span id="cb5-19"><a href="#cb5-19"></a>    <span class="dt">sep =</span> <span class="st">&quot;; &quot;</span>,</span>
+<span id="cb5-20"><a href="#cb5-20"></a>    <span class="dt">na.rm =</span> T</span>
+<span id="cb5-21"><a href="#cb5-21"></a>  ) <span class="op">%&gt;%</span></span>
+<span id="cb5-22"><a href="#cb5-22"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="kw">across</span>(<span class="kw">starts_with</span>(<span class="st">&quot;ihme_level_&quot;</span>), na_if, <span class="st">&quot;&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-23"><a href="#cb5-23"></a><span class="st">  </span><span class="kw">select</span>(</span>
+<span id="cb5-24"><a href="#cb5-24"></a>    nct_id<span class="op">:</span>is_classified, </span>
+<span id="cb5-25"><a href="#cb5-25"></a>    who_level_three, who_level_four, who_level_four_five,</span>
+<span id="cb5-26"><a href="#cb5-26"></a>    ihme_level_three, ihme_level_four,</span>
+<span id="cb5-27"><a href="#cb5-27"></a>    <span class="kw">everything</span>()</span>
+<span id="cb5-28"><a href="#cb5-28"></a>  )</span></code></pre></div>
 <hr />
 </div>
 <div id="sample-size" class="section level1">
@@ -357,13 +366,12 @@ padding: 0 0 0.5em 0
 <h1>Final</h1>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">glimpse</span>(trials)</span></code></pre></div>
 <pre><code>Rows: 508
-Columns: 61
+Columns: 58
 $ nct_id                                 &lt;chr&gt; &quot;NCT01029717&quot;, &quot;NCT00285662&quot;, …
 $ is_eligible                            &lt;lgl&gt; TRUE, TRUE, TRUE, TRUE, TRUE, …
 $ arbitration_eligibility                &lt;chr&gt; NA, NA, &quot;dci: eligible RCT; sc…
-$ `Email_Y (Reply Y/N)`                  &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA…
 $ brief_title                            &lt;chr&gt; &quot;CATCH - Catheter Infections i…
-$ brief_summary...6                      &lt;chr&gt; &quot;Most children admitted to pae…
+$ brief_summary                          &lt;chr&gt; &quot;Most children admitted to pae…
 $ official_title                         &lt;chr&gt; &quot;A Randomised Controlled Trial…
 $ condition                              &lt;chr&gt; &quot;Catheter-Related Infections&quot;,…
 $ is_classified                          &lt;lgl&gt; TRUE, TRUE, TRUE, TRUE, TRUE, …
@@ -375,8 +383,6 @@ $ ihme_level_four                        &lt;chr&gt; &quot;408&quot;, &quot;345&
 $ n_level_three                          &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, …
 $ n_level_four                           &lt;dbl&gt; 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, …
 $ n_sample                               &lt;dbl&gt; 1200, 1100, 1500, 2127, 2600, …
-$ `ihmelevel3C _code`                    &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA…
-$ ...23                                  &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA…
 $ age_category                           &lt;chr&gt; &quot;&lt;5; 5-14&quot;, &quot;&lt;5&quot;, &quot;&lt;5; 5-14&quot;, …
 $ age_stelios                            &lt;chr&gt; &quot;up to 16 Years (Child)&quot;, &quot;2 M…
 $ is_developed                           &lt;lgl&gt; TRUE, FALSE, TRUE, TRUE, FALSE…
@@ -432,7 +438,7 @@ $ intervention_subgroup_sc               &lt;chr&gt; NA, &quot;oral&quot;, NA, &
 <h2>Session Info</h2>
 <pre><code>R version 4.0.2 (2020-06-22)
 Platform: x86_64-apple-darwin17.0 (64-bit)
-Running under: macOS Catalina 10.15.5
+Running under: macOS Catalina 10.15.6
 
 Matrix products: default
 BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib

@@ -245,7 +245,13 @@ trials <- read_excel(
 
 ```{r}
 trials %<>%
-  drop_na(nct_id)
+  drop_na(nct_id) %>% 
+  rename(
+    brief_summary = `brief_summary...6`,
+    ihmelevel3C_code = `ihmelevel3C _code`,
+    ihmelevel3D_code = `...23`
+  ) %>% 
+  select(-`Email_Y (Reply Y/N)`)
 ```
 
 
@@ -295,19 +301,22 @@ trials %<>%
     who_level_three = level3_split_categories_sc,
     who_level_four = level4_split_categories_sc,
     who_level_four_five = sc_multiplecategoryconditions_GBD_final
-  ) %>% 
+  ) %>%
+  mutate(across(ihmelevel4A_code:ihmelevel4E_code, na_if, "unclassified")) %>% 
   unite(
     col = "ihme_level_four", 
     ihmelevel4A_code:ihmelevel4E_code, 
     sep = "; ", 
     na.rm = T
-  ) %>% 
+  ) %>%
+  mutate(across(ihmelevel3A_code:ihmelevel3D_code, na_if, "unclassified")) %>% 
   unite(
     col = "ihme_level_three",  
-    ihmelevel3A_code:ihmelevel3B_code, 
+    ihmelevel3A_code:ihmelevel3D_code, 
     sep = "; ",
     na.rm = T
-  ) %>% 
+  ) %>%
+  mutate(across(starts_with("ihme_level_"), na_if, "")) %>% 
   select(
     nct_id:is_classified, 
     who_level_three, who_level_four, who_level_four_five,
