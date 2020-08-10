@@ -555,12 +555,12 @@ regression %>%
     max.iter = 1000000
   ) +
   geom_point(color = scales::hue_pal()(1)) +
-  geom_smooth(
-    method = "glm",
-    method.args = list(family = quasipoisson),
-    formula = y ~ x,
-    se = T
-  ) +
+  # geom_smooth(
+  #   method = "glm",
+  #   method.args = list(family = quasipoisson),
+  #   formula = y ~ x,
+  #   se = T
+  # ) +
   facet_wrap(~ dev, nrow = 2) +
   labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
   scale_x_continuous(
@@ -597,12 +597,12 @@ regression %>%
     max.iter = 1000000
   ) +
   geom_point(aes(color = complete_enroll)) +
-  geom_smooth(
-    method = "glm",
-    method.args = list(family = quasipoisson),
-    formula = y ~ x,
-    se = T
-  ) +
+  # geom_smooth(
+  #   method = "glm",
+  #   method.args = list(family = quasipoisson),
+  #   formula = y ~ x,
+  #   se = T
+  # ) +
   facet_wrap(~ dev, nrow = 2) +
   scale_x_continuous(
     trans = "log10",
@@ -628,49 +628,217 @@ ggsave(
 )
 ```
 
+## Gamma
+
+```{r}
+regression %>%
+  mutate(sample_size = sample_size + 1) %>% 
+  ggplot(aes(x = dalys, y = sample_size)) +
+  # geom_text_repel(
+  #   aes(label = level_three), 
+  #   size = 3, 
+  #   segment.color = "grey70",
+  #   segment.size = 0.15,
+  #   force = 70,
+  #   max.iter = 1000000
+  # ) +
+  geom_point(color = scales::hue_pal()(1)) +
+  geom_smooth(
+    method = "glm",
+    method.args = list(family = Gamma(link = log)),
+    formula = y + 100 ~ x,
+    se = T
+  ) +
+  facet_wrap(~ dev, scales = "free", nrow = 2) +
+  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  scale_x_continuous(
+    trans = "log10",
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  scale_y_continuous(
+    # trans = "log",
+    labels = scales::comma
+  )
+```
+
+
+## Difference
+
+```{r}
+regression %>%
+  filter(dev != "All") %>% 
+  ggplot(aes(x = dalys, y = sample_size, color = dev, fill = dev)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  scale_x_continuous(
+    trans = "log10",
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  scale_y_continuous(
+    labels = scales::comma
+  ) +
+  labs(color = NULL, fill = NULL)
+```
+
+
+```{r}
+regression %>%
+  filter(dev != "All") %>% 
+  pivot_wider(id_col = dalys, names_from = dev, values_from = sample_size) %>% 
+  mutate(sample_size_diff = `More developed` - `Less developed`) %>% 
+  ggplot(aes(x = dalys, y = sample_size_diff)) +
+  geom_col(width = 1000000)
+```
+
+
+## Binned
+
+```{r}
+regression %>%
+  filter(dev != "All") %>% 
+  pivot_wider(id_col = dalys, names_from = dev, values_from = sample_size) %>%
+  mutate(sample_size_diff = `More developed` - `Less developed`) %>% 
+  ggplot(aes(x = dalys, y = sample_size_diff)) +
+  stat_summary_bin(
+    fun.data = "median_hilow", 
+    bins = 10, 
+    fun.args = c(conf.int = 0.5),  # Use the IQR instead of the max-min
+    color = "grey40"
+  ) +
+  scale_x_continuous(
+    trans = "log10",
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  scale_y_continuous(
+    labels = scales::comma
+  ) +
+  xlab("Log-transformed DALYs (millions)") +
+  ylab("Total sample size in more - less developed")
+```
+
+
+```{r}
+regression %>%
+  filter(dev != "All") %>% 
+  pivot_wider(id_col = dalys, names_from = dev, values_from = sample_size) %>%
+  mutate(sample_size_diff = `More developed` - `Less developed`) %>% 
+  ggplot(aes(x = dalys, y = sample_size_diff)) +
+  stat_summary_bin(
+    fun.data = "median_hilow", 
+    bins = 10, 
+    fun.args = c(conf.int = 0.5),  # Use the IQR instead of the max-min
+    color = "grey40"
+  ) +
+  stat_summary_bin(
+    fun = "c", 
+    bins = 10, 
+    position = "jitter", 
+    size = 0.01,
+    color = "red",
+    alpha = 0.25
+  ) +
+  scale_x_continuous(
+    trans = "log10",
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  scale_y_continuous(
+    labels = scales::comma
+  ) +
+  xlab("Log-transformed DALYs (millions)") +
+  ylab("Total sample size in more - less developed")
+```
+
+
+
+```{r}
+# Plot
+regression %>%
+  filter(dev != "All") %>% 
+  pivot_wider(id_col = dalys, names_from = dev, values_from = sample_size) %>% 
+  mutate(sample_size_diff = `More developed` - `Less developed`) %>% 
+  mutate(daly_groups = cut(dalys, 10)) %>% 
+  ggplot(aes(x = dalys, y = sample_size_diff, group = daly_groups)) + 
+  geom_boxplot(outlier.shape = NA, color = "grey40", fill = "grey80") +
+  geom_jitter(color = "red", alpha = 0.5, stroke = 0, size = 2) +
+  xlab("DALYs (millions)") +
+  ylab("Total sample size in more - less developed") +
+  scale_y_continuous(
+    labels = scales::comma
+  ) +
+  scale_x_continuous(
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  )
+
+# Save
+ggsave(
+  "../../output/figure_output/regression_binned.jpg",
+  width = 13,
+  height = 8
+)
+```
+
 
 ***
 
 
 # Regression analysis
 
-Fit line.
+Fit lines.
 
 ```{r}
-glm.fit1 <- 
+glm.linear <- 
+  regression %>% 
+  filter(dev != "All") %>% 
+  mutate(dalys = dalys / 10^6) %>% 
+  lm(sample_size ~ dalys + dev + dalys * dev, .)
+
+glm.quasi <- 
   regression %>% 
   filter(dev != "All") %>% 
   mutate(dalys = dalys / 10^6) %>% 
   glm(sample_size ~ dalys + dev + dalys * dev, ., family = "quasipoisson")
+
+glm.lognormal <- 
+  regression %>% 
+  filter(dev != "All") %>% 
+  mutate(dalys = dalys / 10^6) %>% 
+  lm(log(sample_size + 1) ~ dalys + dev + dalys * dev, data = .)
+
+glm.gamma <- 
+  regression %>% 
+  filter(dev != "All") %>% 
+  mutate(dalys = dalys / 10^6) %>% 
+  glm(sample_size + 1 ~ dalys + dev + dalys * dev, ., family = Gamma(link = "log"))
 ```
 
 
 Diagnostic plots.
 
 ```{r}
-plot(glm.fit1)
+plot(glm.linear)
 ```
 
 
 Diagnostic statistics.
 
 ```{r}
-broom::glance(glm.fit1) %>% sable()
+broom::glance(glm.linear) %>% sable()
 ```
 
 
 Summarize regression results.
 
 ```{r}
-broom::tidy(glm.fit1, conf.int = T, exp = T) %>% sable()
+broom::tidy(glm.linear, conf.int = T, exp = T) %>% sable()
 ```
 
 Obtain robust results using the sandwich estimator.
 
 ```{r}
 # Calculate
-pvals <- lmtest::coeftest(glm.fit1, vcov = sandwich)
-confints <- lmtest::coefci(glm.fit1, vcov = sandwich)
+pvals <- lmtest::coeftest(glm.linear, vcov = sandwich)
+confints <- lmtest::coefci(glm.linear, vcov = sandwich)
 
 # Construct final table
 pvals %>% 
@@ -678,11 +846,13 @@ pvals %>%
   as.data.frame() %>% 
   rownames_to_column(var = "Variable") %>% 
   as_tibble() %>% 
-  mutate(across(c(Estimate, `2.5 %`, `97.5 %`), exp)) %>% 
+  # mutate(across(c(Estimate, `2.5 %`, `97.5 %`), exp)) %>% 
   sable()
 ```
 
-This table suggests that for every a million DALYs, the expected sample size increases by a median of 1.01 (95% CI, 1.008-1.02; P-value = 0.00002). It also suggests that in the observed trials, the sample size of studies from more developed countries was a median of 51% smaller than that of less developed countries, across levels of DALYs. However, this analysis does not suggest that this is generally true (95% CI, 0.17-1.44). No meaningful effect modification between DALYs and development was observed (95% CI, 0.99-1.01).
+This is a descriptive model, not a model appropriate for prediction or inference. Overall, with every million DALYs, there was a mean increase in total sample size ranging from 261 to 694 (Sandwich p-value, 0.00006). Even though, overall, the mean total sample size in more developed countries was smaller than that of less developed countries, these data do not suggest a simple linear relationship (Sandwich p-value, 0.6).
+
+<!-- Interpretation of the Poisson model: This table suggests that for every a million DALYs, the expected sample size increases by a median of 1.01 (95% CI, 1.008-1.02; P-value = 0.00002). It also suggests that in the observed trials, the sample size of studies from more developed countries was a median of 51% smaller than that of less developed countries, across levels of DALYs. However, this analysis does not suggest that this is generally true (95% CI, 0.17-1.44). No meaningful effect modification between DALYs and development was observed (95% CI, 0.99-1.01). -->
 
 
 ***
