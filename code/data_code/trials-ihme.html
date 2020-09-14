@@ -163,7 +163,7 @@ code span.ot { color: #007020; }
 <div class="header-title-wrap">
 <h1 class="title toc-ignore entry-title">Pediatric clinical trials: Prepare trial data for analysis</h1>
 <h3 class="author">Stylianos Serghiou</h3>
-<h3 class="date">27/07/2020</h3>
+<h3 class="date">13/09/2020</h3>
 </div><!-- /.header-title-wrap -->
 </header>
 
@@ -207,7 +207,7 @@ padding: 0 0 0.5em 0
 <span id="cb1-5"><a href="#cb1-5"></a></span>
 <span id="cb1-6"><a href="#cb1-6"></a><span class="co"># Import data</span></span>
 <span id="cb1-7"><a href="#cb1-7"></a>trials &lt;-<span class="st"> </span><span class="kw">read_excel</span>(</span>
-<span id="cb1-8"><a href="#cb1-8"></a>  <span class="st">&quot;../../data/interim_data/categorizations_07192020_conditions.xlsx&quot;</span>,</span>
+<span id="cb1-8"><a href="#cb1-8"></a>  <span class="st">&quot;../../data/interim_data/categorizations_08132020_conditions.xlsx&quot;</span>,</span>
 <span id="cb1-9"><a href="#cb1-9"></a>  <span class="dt">sheet =</span> <span class="dv">1</span></span>
 <span id="cb1-10"><a href="#cb1-10"></a>)</span></code></pre></div>
 <hr />
@@ -218,10 +218,9 @@ padding: 0 0 0.5em 0
 <span id="cb2-2"><a href="#cb2-2"></a><span class="st">  </span><span class="kw">drop_na</span>(nct_id) <span class="op">%&gt;%</span><span class="st"> </span></span>
 <span id="cb2-3"><a href="#cb2-3"></a><span class="st">  </span><span class="kw">rename</span>(</span>
 <span id="cb2-4"><a href="#cb2-4"></a>    <span class="dt">brief_summary =</span> <span class="st">`</span><span class="dt">brief_summary...6</span><span class="st">`</span>,</span>
-<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">ihmelevel3C_code =</span> <span class="st">`</span><span class="dt">ihmelevel3C _code</span><span class="st">`</span>,</span>
-<span id="cb2-6"><a href="#cb2-6"></a>    <span class="dt">ihmelevel3D_code =</span> <span class="st">`</span><span class="dt">...23</span><span class="st">`</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb2-8"><a href="#cb2-8"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="st">`</span><span class="dt">Email_Y (Reply Y/N)</span><span class="st">`</span>)</span></code></pre></div>
+<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">ihmelevel3C_code =</span> <span class="st">`</span><span class="dt">ihmelevel3C _code</span><span class="st">`</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="st">`</span><span class="dt">Email_Y (Reply Y/N)</span><span class="st">`</span>)</span></code></pre></div>
 <hr />
 </div>
 <div id="eligibility" class="section level1">
@@ -366,7 +365,7 @@ padding: 0 0 0.5em 0
 <h1>Final</h1>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">glimpse</span>(trials)</span></code></pre></div>
 <pre><code>Rows: 508
-Columns: 58
+Columns: 68
 $ nct_id                                 &lt;chr&gt; &quot;NCT01029717&quot;, &quot;NCT00285662&quot;, …
 $ is_eligible                            &lt;lgl&gt; TRUE, TRUE, TRUE, TRUE, TRUE, …
 $ arbitration_eligibility                &lt;chr&gt; NA, NA, &quot;dci: eligible RCT; sc…
@@ -403,7 +402,7 @@ $ NOTES                                  &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA,
 $ all_publications_sc                    &lt;chr&gt; &quot;26935961&quot;, &quot;23403171; 2219878…
 $ main_pmid_sc                           &lt;chr&gt; &quot;26935961&quot;, &quot;22198787&quot;, &quot;20407…
 $ main_citation                          &lt;chr&gt; &quot;Harron K, Mok Q, Dwan K, et a…
-$ `first_mainpublished_date_7/1/2020_sc` &lt;chr&gt; &quot;42430&quot;, &quot;40900&quot;, &quot;40367&quot;, &quot;42…
+$ `first_mainpublished_date_7/1/2020_sc` &lt;dttm&gt; 2016-03-01, 2011-12-23, 2010-…
 $ number_publications                    &lt;dbl&gt; 1, 3, 4, 1, 1, 2, 1, 1, 4, 1, …
 $ protocol_pmid_sc                       &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA…
 $ protocol_citation                      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA…
@@ -424,7 +423,17 @@ $ intervention_name                      &lt;chr&gt; &quot;Standard polyurethane
 $ brief_summary...68                     &lt;chr&gt; &quot;Most children admitted to pae…
 $ dci_arbitration_intervention           &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA…
 $ intervention_sc                        &lt;chr&gt; &quot;medical_device&quot;, &quot;drug&quot;, &quot;dru…
-$ intervention_subgroup_sc               &lt;chr&gt; NA, &quot;oral&quot;, NA, &quot;instramuscula…</code></pre>
+$ intervention_subgroup_sc               &lt;chr&gt; NA, &quot;oral&quot;, NA, &quot;instramuscula…
+$ prevention_treatment                   &lt;chr&gt; &quot;Prevention&quot;, &quot;Prevention&quot;, &quot;T…
+$ primary_outcome_stelios                &lt;chr&gt; &quot;The primary outcome will be t…
+$ sc_outcome                             &lt;chr&gt; &quot;non-mortality&quot;, &quot;non-mortalit…
+$ secondary_outcome_stelios              &lt;chr&gt; &quot;0&quot;, &quot;Incidence of moderate-to…
+$ sc_outcome_secondary                   &lt;chr&gt; &quot;none&quot;, &quot;non-mortality&quot;, &quot;comp…
+$ start_date                             &lt;dttm&gt; 2010-01-01, 2006-06-01, 1998-…
+$ registration_date                      &lt;dbl&gt; 40156, 38749, 36465, 38546, 39…
+$ completion_date                        &lt;dbl&gt; NA, 43961, NA, 43901, NA, NA, …
+$ last_update                            &lt;dbl&gt; NA, NA, NA, NA, NA, 43727, NA,…
+$ development_status                     &lt;chr&gt; &quot;highly_developed&quot;, &quot;less_deve…</code></pre>
 <hr />
 </div>
 <div id="save" class="section level1">
@@ -448,16 +457,16 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] forcats_0.5.0    stringr_1.4.0    dplyr_1.0.0      purrr_0.3.4     
+ [1] forcats_0.5.0    stringr_1.4.0    dplyr_1.0.2      purrr_0.3.4     
  [5] readr_1.3.1      tidyr_1.1.0      tibble_3.0.3     tidyverse_1.3.0 
  [9] readxl_1.3.1     magrittr_1.5     ggplot2_3.3.2    kableExtra_1.1.0
 [13] rmdformats_0.3.7 knitr_1.29      
 
 loaded via a namespace (and not attached):
  [1] prettydoc_0.3.1   tidyselect_1.1.0  xfun_0.15         haven_2.3.1      
- [5] colorspace_1.4-1  vctrs_0.3.2       generics_0.0.2    htmltools_0.5.0  
+ [5] colorspace_1.4-1  vctrs_0.3.4       generics_0.0.2    htmltools_0.5.0  
  [9] viridisLite_0.3.0 yaml_2.2.1        utf8_1.1.4        blob_1.2.1       
-[13] rlang_0.4.7       pillar_1.4.6      glue_1.4.1        withr_2.2.0      
+[13] rlang_0.4.7       pillar_1.4.6      glue_1.4.2        withr_2.2.0      
 [17] DBI_1.1.0         dbplyr_1.4.4      modelr_0.1.8      lifecycle_0.2.0  
 [21] munsell_0.5.0     gtable_0.3.0      cellranger_1.1.0  rvest_0.3.5      
 [25] evaluate_0.14     fansi_0.4.1       broom_0.7.0       Rcpp_1.0.5       
@@ -477,7 +486,7 @@ Computing_. R Foundation for Statistical Computing, Vienna, Austria.
 
 [[2]]
 Wickham H, François R, Henry L, Müller K (2020). _dplyr: A Grammar of
-Data Manipulation_. R package version 1.0.0, &lt;URL:
+Data Manipulation_. R package version 1.0.2, &lt;URL:
 https://CRAN.R-project.org/package=dplyr&gt;.
 
 [[3]]
