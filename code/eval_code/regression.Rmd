@@ -256,6 +256,7 @@ who <- read_csv(
 
 # Create dataset
 
+## All studies
 
 ```{r}
 # Create an appropriate IHME
@@ -307,6 +308,58 @@ glimpse(regression)
 ```
 
 
+## Completed studies
+
+```{r}
+# Create an appropriate IHME
+ihme_dev <- 
+  list(
+    `More developed` = ihme,
+    `Less developed` = ihme,
+    `All` = ihme
+  ) %>% 
+  bind_rows(.id = "dev")
+
+# Create duplicated dataset
+regression_completed <-
+  trials %>% 
+  filter(status_final == "Completed") %>% 
+  mutate(dev = if_else(is_developed, "More developed", "Less developed")) %>% 
+  bind_rows(trials, .id = "id_dev") %>%
+  mutate(dev = if_else(id_dev == 2, "All", dev)) %>% 
+  filter(is_eligible, is_classified) %>%
+  separate_rows(ihme_level_three, sep = "; ") %>%
+  select(-condition) %>%
+  right_join(ihme_dev, by = c("ihme_level_three" = "ihme_id", "dev")) %>%
+  filter(level == "level_three") %>% 
+  mutate(level_three = condition) %>% 
+  left_join(select(who, ID, level_two), by = c("who_id" = "ID")) %>% 
+  mutate(n_sample_adjust = n_sample / n_level_three)
+
+
+# Summarize values
+regression_completed %<>%
+  group_by(dev, level_three, dalys) %>% 
+  summarise(
+    sample_size = sum(n_sample_adjust, na.rm = T),
+    n_studies = sum(!is.na(n_sample)),
+    n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
+    p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
+  ) %>% 
+  mutate(complete_enroll = case_when(
+    is.na(p_complete_enroll) | is.nan(p_complete_enroll)  ~ NA_character_,
+    p_complete_enroll > 0.5 ~ ">50%",
+    p_complete_enroll < 0.25 ~ "0-25%",
+    T ~ "25-50%"
+  )) %>%
+  mutate(complete_enroll = factor(complete_enroll)) %>%
+  mutate(complete_enroll = fct_relevel(complete_enroll, ">50%", "25-50%")) %>%
+  ungroup()
+
+# Glimpse
+glimpse(regression_completed)
+```
+
 ***
 
 
@@ -324,7 +377,7 @@ regression %>%
 ```
 
 
-# Plots
+# Plots for all
 
 ## Boxplot
 
@@ -552,7 +605,8 @@ regression %>%
     segment.color = "grey70",
     segment.size = 0.15,
     force = 70,
-    max.iter = 1000000
+    max.iter = 1000000,
+    seed = 2120
   ) +
   geom_point(color = scales::hue_pal()(1)) +
   # geom_smooth(
@@ -593,8 +647,9 @@ regression %>%
     segment.color = "grey80",
     segment.size = 0.1,
     force = 50,
-    max.time = 5,
-    max.iter = 1000000
+    max.time = 10,
+    max.iter = 1000000,
+    seed = 2120
   ) +
   geom_point(aes(color = complete_enroll)) +
   # geom_smooth(
@@ -627,6 +682,7 @@ ggsave(
   height = 8
 )
 ```
+
 
 ## Gamma
 
@@ -782,9 +838,104 @@ ggsave(
 ***
 
 
+# Plots for completed trials
+
+## Log - Poisson
+
+```{r}
+regression_completed %>%
+  ggplot(aes(x = dalys, y = sample_size)) +
+  geom_text_repel(
+    aes(label = level_three), 
+    size = 3, 
+    segment.color = "grey70",
+    segment.size = 0.15,
+    force = 70,
+    max.iter = 1000000,
+    seed = 2121
+  ) +
+  geom_point(color = scales::hue_pal()(1)) +
+  # geom_smooth(
+  #   method = "glm",
+  #   method.args = list(family = quasipoisson),
+  #   formula = y ~ x,
+  #   se = T
+  # ) +
+  facet_wrap(~ dev, nrow = 2) +
+  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  scale_x_continuous(
+    trans = "log10",
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  scale_y_continuous(
+    # trans = "log",
+    labels = scales::comma
+  ) +
+  coord_cartesian(ylim = c(-150000, 200000))
+
+# Save
+ggsave(
+  "../../output/figure_output/regression_log_poisson_completed.jpg",
+  width = 13,
+  height = 8
+)
+```
+
+
+## Log - Poisson - Enrollment
+
+```{r}
+regression_completed %>%
+  ggplot(aes(x = dalys, y = sample_size)) +
+  geom_text_repel(
+    aes(label = level_three), 
+    size = 3,
+    segment.color = "grey80",
+    segment.size = 0.1,
+    force = 50,
+    max.time = 5,
+    max.iter = 1000000,
+    seed = 2121
+  ) +
+  geom_point(aes(color = complete_enroll)) +
+  # geom_smooth(
+  #   method = "glm",
+  #   method.args = list(family = quasipoisson),
+  #   formula = y ~ x,
+  #   se = T
+  # ) +
+  facet_wrap(~ dev, nrow = 2) +
+  scale_x_continuous(
+    trans = "log10",
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    name = "Log-transformed DALYs (millions)"
+  ) +
+  scale_y_continuous(
+    # trans = "log",
+    labels = scales::comma,
+    name = "Total sample size"
+  ) +
+  scale_color_discrete(
+    name = "Complete or recruiting", 
+    labels = c(">50%", "25-50%", "0-25%", "No studies")
+  ) +
+  coord_cartesian(ylim = c(-100000, 200000))
+
+# Save
+ggsave(
+  "../../output/figure_output/regression_log_poisson_enrollment_completed.jpg",
+  width = 13,
+  height = 8
+)
+```
+
+
+***
+
+
 # Regression analysis
 
-Fit lines.
+Fit lines. Note that the lower the AIC the better. Note that R squared measures training error, whereas AIC estimates test error.
 
 ```{r}
 glm.linear <- 
@@ -803,7 +954,7 @@ glm.lognormal <-
   regression %>% 
   filter(dev != "All") %>% 
   mutate(dalys = dalys / 10^6) %>% 
-  lm(log(sample_size + 1) ~ dalys + dev + dalys * dev, data = .)
+  glm(log(sample_size + 1) ~ dalys + dev + dalys * dev, ., family = gaussian())
 
 glm.gamma <- 
   regression %>% 
@@ -811,6 +962,8 @@ glm.gamma <-
   mutate(dalys = dalys / 10^6) %>% 
   glm(sample_size + 1 ~ dalys + dev + dalys * dev, ., family = Gamma(link = "log"))
 ```
+
+None of the above models provide a particularly good summary of the data. However, the OLS model outperforms the rest in sample and provides simple summary statistics that, alongside a stratified descriptive analysis, appears to be the most informative.
 
 
 Diagnostic plots.
@@ -868,6 +1021,14 @@ regression %>%
   sable()
 ```
 
+
+```{r}
+regression_completed %>% 
+  filter(dev != "all") %$% 
+  cor.test(sample_size, dalys, method = "spearman") %>% 
+  broom::tidy() %>% 
+  sable()
+```
 
 
 # Documentation {.tabset}
