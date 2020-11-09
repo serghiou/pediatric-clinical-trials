@@ -281,13 +281,12 @@ regression <-
   left_join(select(who, ID, level_two), by = c("who_id" = "ID")) %>% 
   mutate(n_sample_adjust = n_sample / n_level_three)
 
-
 # Summarize values
 regression %<>%
   group_by(dev, level_three, dalys) %>% 
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
-    n_trials = sum(!is.na(n_sample)),
+    n_trials = sum(!is.na(n_sample)),  # avoid counting conditions with no trial
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
   ) %>% 
@@ -340,7 +339,7 @@ regression_completed %<>%
   group_by(dev, level_three, dalys) %>% 
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
-    n_trials = sum(!is.na(n_sample)),
+    n_trials = sum(!is.na(n_sample)),  # avoid counting conditions with no trial
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
   ) %>% 

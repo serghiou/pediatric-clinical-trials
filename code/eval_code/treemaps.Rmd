@@ -297,7 +297,7 @@ treemaps %<>%
   group_by(level_two, level_three, dalys) %>% 
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
-    n_trials = sum(!is.na(n_sample)),
+    n_trials = sum(!is.na(n_sample)),  # avoid counting conditions with no trial
     n_complete_only = sum(str_detect(status_june23_sc, "C"), na.rm = T),
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
@@ -538,7 +538,7 @@ treemaps %<>%
   group_by(level_two, level_three, level_four, dalys) %>% 
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
-    n_trials = sum(!is.na(n_sample)),
+    n_trials = sum(!is.na(n_sample)),  # avoid counting conditions with no trial
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
   ) %>% 
