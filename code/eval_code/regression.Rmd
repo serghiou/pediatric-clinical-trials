@@ -69,8 +69,6 @@ library(kableExtra)
 library(ggplot2)
 library(magrittr)
 
-
-
 ######### knitr
 
 # Define chunk options
@@ -181,7 +179,7 @@ my_theme <-
     axis.title.y  = element_text(margin = margin(r = 10)),
     legend.key = element_rect(colour = NA, fill = NA),  # Avoid borders
     panel.border = element_blank(), 
-    text = element_text(color = "grey20"),
+    text = element_text(color = "grey20", family = "Times"),
     title = element_text(face = "bold")
   )
 
@@ -289,7 +287,7 @@ regression %<>%
   group_by(dev, level_three, dalys) %>% 
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
-    n_studies = sum(!is.na(n_sample)),
+    n_trials = sum(!is.na(n_sample)),
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
   ) %>% 
@@ -342,7 +340,7 @@ regression_completed %<>%
   group_by(dev, level_three, dalys) %>% 
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
-    n_studies = sum(!is.na(n_sample)),
+    n_trials = sum(!is.na(n_sample)),
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
   ) %>% 
@@ -372,7 +370,7 @@ glimpse(regression_completed)
 regression %>%
   filter(dev != "All") %>% 
   group_by(dev) %>% 
-  summarise(total_sample = sum(sample_size)) %>%
+  summarise(total_sample = sum(n_trials)) %>%
   mutate(p = scales::percent(total_sample / sum(total_sample), 0.1)) %>% 
   sable()
 ```
@@ -386,9 +384,9 @@ Boxplot of sample size.
 
 ```{r}
 regression %>% 
-  ggplot(aes(x = dev, y = sample_size, fill = dev, col = dev)) +
+  ggplot(aes(x = dev, y = n_trials, fill = dev, col = dev)) +
   geom_boxplot(alpha = 0.75, show.legend = F) +
-  labs(x = NULL, y = "Total sample size") +
+  labs(x = NULL, y = "Number of trials") +
   scale_y_continuous(labels = scales::comma)
 
 # Save
@@ -402,9 +400,9 @@ Across all.
 
 ```{r}
 regression %>% 
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_hex() +
-  labs(x = "DALYs", y = "Total sample size") +
+  labs(x = "DALYs", y = "Number of trials") +
   scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   scale_y_continuous(labels = scales::comma) +
   scale_fill_continuous(name = "Count\n")
@@ -422,9 +420,9 @@ Stratified by development.
 
 ```{r}
 regression %>% 
-  ggplot(aes(x = dalys, y = sample_size, fill = dev)) +
+  ggplot(aes(x = dalys, y = n_trials, fill = dev)) +
   geom_hex() +
-  labs(x = "DALYs", y = "Total sample size") +
+  labs(x = "DALYs", y = "Number of trials") +
   scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   scale_y_continuous(labels = scales::comma)
 
@@ -441,12 +439,12 @@ ggsave(
 
 ```{r}
 regression %>%
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ x) +
   geom_text_repel(aes(label = level_three), size = 2, segment.size = 0.2) +
   facet_wrap(~ dev, nrow = 2) +
-  labs(x = "DALYs (millions)", y = "Total sample size") +
+  labs(x = "DALYs (millions)", y = "Number of trials") +
   scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   scale_y_continuous(labels = scales::comma)
 
@@ -464,7 +462,7 @@ ggsave(
 ```{r}
 regression %>%
   filter(dev == "All") %>% 
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_point() +
   geom_smooth(
     method = "lm", 
@@ -490,7 +488,7 @@ regression %>%
     se = F
   ) +
   facet_wrap(~ dev, nrow = 2) +
-  labs(x = "DALYs (millions)", y = "Total sample size") +
+  labs(x = "DALYs (millions)", y = "Number of trials") +
   scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   scale_y_continuous(labels = scales::comma)
 
@@ -507,7 +505,7 @@ ggsave(
 
 ```{r}
 regression %>%
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_point(aes(color = complete_enroll)) +
   geom_smooth(method = "lm", formula = y ~ x) +
   geom_text_repel(
@@ -523,7 +521,7 @@ regression %>%
   ) +
   scale_y_continuous(
     labels = scales::comma,
-    name = "Total sample size"
+    name = "Number of trials"
   )
 
 # Save
@@ -539,12 +537,12 @@ ggsave(
 
 ```{r}
 regression %>%
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_point(color = scales::hue_pal()(1)) +
   geom_smooth(method = "lm", formula = y ~ x) +
   geom_text_repel(aes(label = level_three), size = 2, segment.size = 0.2) +
   facet_wrap(~ dev, nrow = 2) +
-  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  labs(x = "Log-transformed DALYs (millions)", y = "Number of trials") +
   scale_x_continuous(
     trans = "log10",
     labels = scales::unit_format(unit = "M", scale = 1e-6)
@@ -567,7 +565,7 @@ ggsave(
 
 ```{r}
 regression %>%
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_point(aes(color = complete_enroll)) +
   geom_smooth(method = "lm", formula = y ~ x) +
   geom_text_repel(
@@ -584,7 +582,7 @@ regression %>%
   ) +
   scale_y_continuous(
     labels = scales::comma,
-    name = "Total sample size"
+    name = "Number of trials"
   )
 
 # Save
@@ -600,13 +598,14 @@ ggsave(
 
 ```{r}
 regression %>%
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_text_repel(
     aes(label = level_three), 
     size = 3, 
     segment.color = "grey70",
     segment.size = 0.15,
     force = 70,
+    family = "Times",
     max.iter = 1000000,
     seed = 2120
   ) +
@@ -618,16 +617,17 @@ regression %>%
   #   se = T
   # ) +
   facet_wrap(~ dev, nrow = 2) +
-  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  labs(x = "Log-transformed DALYs (millions)", y = "Number of trials") +
   scale_x_continuous(
     trans = "log10",
     labels = scales::unit_format(unit = "M", scale = 1e-6)
   ) +
   scale_y_continuous(
     # trans = "log",
+    breaks = c(0, 20, 40),
     labels = scales::comma
   ) +
-  coord_cartesian(ylim = c(-150000, 200000))
+  coord_cartesian(ylim = c(-20, 50))
 
 # Save
 ggsave(
@@ -642,13 +642,14 @@ ggsave(
 
 ```{r}
 regression %>%
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_text_repel(
     aes(label = level_three), 
     size = 3,
     segment.color = "grey80",
     segment.size = 0.1,
     force = 50,
+    family = "Times",
     max.time = 10,
     max.iter = 1000000,
     seed = 2120
@@ -668,14 +669,15 @@ regression %>%
   ) +
   scale_y_continuous(
     # trans = "log",
+    breaks = c(0, 20, 40),
     labels = scales::comma,
-    name = "Total sample size"
+    name = "Number of trials"
   ) +
   scale_color_discrete(
     name = "Complete or recruiting", 
     labels = c(">50%", "25-50%", "0-25%", "No studies")
   ) +
-  coord_cartesian(ylim = c(-100000, 200000))
+  coord_cartesian(ylim = c(-20, 50))
 
 # Save
 ggsave(
@@ -690,8 +692,8 @@ ggsave(
 
 ```{r}
 regression %>%
-  mutate(sample_size = sample_size + 1) %>% 
-  ggplot(aes(x = dalys, y = sample_size)) +
+  mutate(n_trials = n_trials + 1) %>% 
+  ggplot(aes(x = dalys, y = n_trials)) +
   # geom_text_repel(
   #   aes(label = level_three), 
   #   size = 3, 
@@ -708,7 +710,7 @@ regression %>%
     se = T
   ) +
   facet_wrap(~ dev, scales = "free", nrow = 2) +
-  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  labs(x = "Log-transformed DALYs (millions)", y = "Number of trials") +
   scale_x_continuous(
     trans = "log10",
     labels = scales::unit_format(unit = "M", scale = 1e-6)
@@ -725,10 +727,10 @@ regression %>%
 ```{r}
 regression %>%
   filter(dev != "All") %>% 
-  ggplot(aes(x = dalys, y = sample_size, color = dev, fill = dev)) +
+  ggplot(aes(x = dalys, y = n_trials, color = dev, fill = dev)) +
   geom_line() +
   geom_point() +
-  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  labs(x = "Log-transformed DALYs (millions)", y = "Number of trials") +
   scale_x_continuous(
     trans = "log10",
     labels = scales::unit_format(unit = "M", scale = 1e-6)
@@ -743,9 +745,9 @@ regression %>%
 ```{r}
 regression %>%
   filter(dev != "All") %>% 
-  pivot_wider(id_col = dalys, names_from = dev, values_from = sample_size) %>% 
-  mutate(sample_size_diff = `More developed` - `Less developed`) %>% 
-  ggplot(aes(x = dalys, y = sample_size_diff)) +
+  pivot_wider(id_col = dalys, names_from = dev, values_from = n_trials) %>% 
+  mutate(n_trials_diff = `More developed` - `Less developed`) %>% 
+  ggplot(aes(x = dalys, y = n_trials_diff)) +
   geom_col(width = 1000000)
 ```
 
@@ -755,9 +757,9 @@ regression %>%
 ```{r}
 regression %>%
   filter(dev != "All") %>% 
-  pivot_wider(id_col = dalys, names_from = dev, values_from = sample_size) %>%
-  mutate(sample_size_diff = `More developed` - `Less developed`) %>% 
-  ggplot(aes(x = dalys, y = sample_size_diff)) +
+  pivot_wider(id_col = dalys, names_from = dev, values_from = n_trials) %>%
+  mutate(n_trials_diff = `More developed` - `Less developed`) %>% 
+  ggplot(aes(x = dalys, y = n_trials_diff)) +
   stat_summary_bin(
     fun.data = "median_hilow", 
     bins = 10, 
@@ -772,16 +774,16 @@ regression %>%
     labels = scales::comma
   ) +
   xlab("Log-transformed DALYs (millions)") +
-  ylab("Total sample size in more - less developed")
+  ylab("Number of trials in more - less developed")
 ```
 
 
 ```{r}
 regression %>%
   filter(dev != "All") %>% 
-  pivot_wider(id_col = dalys, names_from = dev, values_from = sample_size) %>%
-  mutate(sample_size_diff = `More developed` - `Less developed`) %>% 
-  ggplot(aes(x = dalys, y = sample_size_diff)) +
+  pivot_wider(id_col = dalys, names_from = dev, values_from = n_trials) %>%
+  mutate(n_trials_diff = `More developed` - `Less developed`) %>% 
+  ggplot(aes(x = dalys, y = n_trials_diff)) +
   stat_summary_bin(
     fun.data = "median_hilow", 
     bins = 10, 
@@ -804,7 +806,7 @@ regression %>%
     labels = scales::comma
   ) +
   xlab("Log-transformed DALYs (millions)") +
-  ylab("Total sample size in more - less developed")
+  ylab("Number of trials in more - less developed")
 ```
 
 
@@ -813,14 +815,14 @@ regression %>%
 # Plot
 regression %>%
   filter(dev != "All") %>% 
-  pivot_wider(id_col = dalys, names_from = dev, values_from = sample_size) %>% 
-  mutate(sample_size_diff = `More developed` - `Less developed`) %>% 
+  pivot_wider(id_col = dalys, names_from = dev, values_from = n_trials) %>% 
+  mutate(n_trials_diff = `More developed` - `Less developed`) %>% 
   mutate(daly_groups = cut(dalys, 10)) %>% 
-  ggplot(aes(x = dalys, y = sample_size_diff, group = daly_groups)) + 
+  ggplot(aes(x = dalys, y = n_trials_diff, group = daly_groups)) + 
   geom_boxplot(outlier.shape = NA, color = "grey40", fill = "grey80") +
   geom_jitter(color = "red", alpha = 0.5, stroke = 0, size = 2) +
   xlab("DALYs (millions)") +
-  ylab("Total sample size in more - less developed") +
+  ylab("Number of trials in more - less developed") +
   scale_y_continuous(
     labels = scales::comma
   ) +
@@ -846,7 +848,7 @@ ggsave(
 
 ```{r}
 regression_completed %>%
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_text_repel(
     aes(label = level_three), 
     size = 3, 
@@ -864,7 +866,7 @@ regression_completed %>%
   #   se = T
   # ) +
   facet_wrap(~ dev, nrow = 2) +
-  labs(x = "Log-transformed DALYs (millions)", y = "Total sample size") +
+  labs(x = "Log-transformed DALYs (millions)", y = "Number of trials") +
   scale_x_continuous(
     trans = "log10",
     labels = scales::unit_format(unit = "M", scale = 1e-6)
@@ -888,7 +890,7 @@ ggsave(
 
 ```{r}
 regression_completed %>%
-  ggplot(aes(x = dalys, y = sample_size)) +
+  ggplot(aes(x = dalys, y = n_trials)) +
   geom_text_repel(
     aes(label = level_three), 
     size = 3,
@@ -915,7 +917,7 @@ regression_completed %>%
   scale_y_continuous(
     # trans = "log",
     labels = scales::comma,
-    name = "Total sample size"
+    name = "Number of trials"
   ) +
   scale_color_discrete(
     name = "Complete or recruiting", 
@@ -944,25 +946,25 @@ glm.linear <-
   regression %>% 
   filter(dev != "All") %>% 
   mutate(dalys = dalys / 10^6) %>% 
-  lm(sample_size ~ dalys + dev + dalys * dev, .)
+  lm(n_trials ~ dalys + dev + dalys * dev, .)
 
 glm.quasi <- 
   regression %>% 
   filter(dev != "All") %>% 
   mutate(dalys = dalys / 10^6) %>% 
-  glm(sample_size ~ dalys + dev + dalys * dev, ., family = "quasipoisson")
+  glm(n_trials ~ dalys + dev + dalys * dev, ., family = "quasipoisson")
 
 glm.lognormal <- 
   regression %>% 
   filter(dev != "All") %>% 
   mutate(dalys = dalys / 10^6) %>% 
-  glm(log(sample_size + 1) ~ dalys + dev + dalys * dev, ., family = gaussian())
+  glm(log(n_trials + 1) ~ dalys + dev + dalys * dev, ., family = gaussian())
 
 glm.gamma <- 
   regression %>% 
   filter(dev != "All") %>% 
   mutate(dalys = dalys / 10^6) %>% 
-  glm(sample_size + 1 ~ dalys + dev + dalys * dev, ., family = Gamma(link = "log"))
+  glm(n_trials + 1 ~ dalys + dev + dalys * dev, ., family = Gamma(link = "log"))
 ```
 
 None of the above models provide a particularly good summary of the data. However, the OLS model outperforms the rest in sample and provides simple summary statistics that, alongside a stratified descriptive analysis, appears to be the most informative.
@@ -1018,7 +1020,7 @@ This is a descriptive model, not a model appropriate for prediction or inference
 ```{r}
 regression %>% 
   filter(dev != "all") %$% 
-  cor.test(sample_size, dalys, method = "spearman") %>% 
+  cor.test(n_trials, dalys, method = "spearman") %>% 
   broom::tidy() %>% 
   sable()
 ```
@@ -1027,7 +1029,7 @@ regression %>%
 ```{r}
 regression_completed %>% 
   filter(dev != "all") %$% 
-  cor.test(sample_size, dalys, method = "spearman") %>% 
+  cor.test(n_trials, dalys, method = "spearman") %>% 
   broom::tidy() %>% 
   sable()
 ```
