@@ -181,7 +181,7 @@ my_theme <-
     axis.text.y  = element_text(margin = margin(r = 3)),
     legend.key = element_rect(colour = NA, fill = NA),  # Avoid borders
     panel.border = element_blank(), 
-    text = element_text(color = "grey20"),
+    text = element_text(color = "grey20", family = "Times"),
     title = element_text(face = "bold")
   )
 
@@ -305,6 +305,14 @@ world_centroids %<>%
   left_join(heat_map) %>% 
   filter(!is.na(sample_size)) %>% 
   distinct(centroid_long, centroid_lat, region)
+
+# Specific changes
+world_centroids %<>% 
+  mutate(
+    centroid_long = ifelse(region == "USA", -100, centroid_long),
+    centroid_lat = ifelse(region == "USA", 40, centroid_lat),
+    centroid_long = ifelse(region == "Canada", -112, centroid_long),
+  )
 ```
 
 
@@ -348,7 +356,8 @@ heat_map %>%
   geom_text(
     data = world_centroids,
     aes(x = centroid_long, y = centroid_lat, label = region),
-    size = 1
+    size = 1,
+    family = "Times"
   ) +
   # geom_text_repel(
   #   data = country_centroids,
