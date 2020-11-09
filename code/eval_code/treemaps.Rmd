@@ -181,7 +181,7 @@ my_theme <-
     axis.text.y  = element_text(margin = margin(r = 3)),
     legend.key = element_rect(colour = NA, fill = NA),  # Avoid borders
     panel.border = element_blank(), 
-    text = element_text(color = "grey20"),
+    text = element_text(color = "grey20", family = "Times"),
     title = element_text(face = "bold")
   )
 
@@ -297,7 +297,7 @@ treemaps %<>%
   group_by(level_two, level_three, dalys) %>% 
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
-    n_studies = sum(!is.na(n_sample)),
+    n_trials = sum(!is.na(n_sample)),
     n_complete_only = sum(str_detect(status_june23_sc, "C"), na.rm = T),
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
@@ -325,6 +325,7 @@ treemaps %>%
   sable()
 ```
 
+
 Inspect levels with 0-50% enrollment.
 
 ```{r}
@@ -344,13 +345,13 @@ colfunc <- colorRampPalette(c("red", "yellow", "green"))
 
 # Plot
 treemaps %>%
-  mutate_at(vars(sample_size), na_if, 0) %>% 
+  mutate_at(vars(n_trials), na_if, 0) %>% 
   ggplot(aes(
     area = dalys, 
-    fill = sample_size,
+    fill = n_trials,
     label = level_three,
     subgroup = level_two,
-  ), color = "white") +
+  )) +
   geom_treemap(color = "white", size = 1) +
   geom_treemap_text(
     colour = "grey20", 
@@ -358,19 +359,20 @@ treemaps %>%
     grow = F, 
     reflow = T, 
     min.size = 1,
+    family = "Times",
+    fontface = "bold",
     padding.x = unit(2, units = "mm"),
     padding.y = unit(2, units = "mm"),
   ) +
   geom_treemap_subgroup_border(color = "white", size = 5) +
-  labs(fill = "Total sample") +
-  theme(legend.title = element_text(vjust = 2)) +
   scale_fill_gradient(
     low = "#F2DF91",
     high = "#CE0A04",
     na.value = "grey90",
-    name = "Total sample",
+    name = "Number of trials",
     labels = scales::comma
-  )
+  ) +
+  theme(legend.title = element_text(vjust = 2))
   # scale_fill_gradientn(
   #   labels = scales::comma,
   #   colours = heat.colors(10, alpha = 0.65),
@@ -395,10 +397,10 @@ colfunc <- colorRampPalette(c("red", "yellow", "green"))
 
 # Plot
 treemaps %>%
-  mutate_at(vars(sample_size), na_if, 0) %>% 
+  mutate_at(vars(n_trials), na_if, 0) %>% 
   ggplot(aes(
     area = dalys, 
-    fill = sample_size,
+    fill = n_trials,
     label = level_three,
     subgroup = level_two,
   ), color = "white") +
@@ -409,29 +411,30 @@ treemaps %>%
     grow = F,
     reflow = T, 
     min.size = 1,
+    family = "Times",
+    fontface = "bold",
     padding.x = unit(2, units = "mm"),
     padding.y = unit(2, units = "mm"),
     show.legend = T
   ) +
   geom_treemap_subgroup_border(color = "white", size = 5) +
-  labs(color = "Complete or recruiting") +
-  guides(color = guide_legend(override.aes = list(size = 3))) +
-  theme(
-    legend.title = element_text(vjust = 2)
+  scale_color_manual(
+    values = c("grey20", "dodgerblue3", "coral3"),
+    na.value = "white",
+    name = "Complete or recruiting"
   ) +
   scale_fill_gradient(
     low = "#F2DF91",
     high = "#CE0A04",
     na.value = "grey90",
-    name = "Total sample",
-    labels = scales::comma
+    labels = scales::comma,
+    name = "Number of trials"
   ) +
-  scale_color_brewer(palette = "Spectral") +
-  scale_color_manual(
-    values = c("grey20", "dodgerblue3", "coral3"),
-    na.value = "white",
-    name = "Complete or recruiting"
-  )
+  theme(
+    legend.title = element_text(vjust = 2)
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 3)))
+  # scale_color_brewer(palette = "Spectral") +
   # scale_fill_gradientn(
   #   labels = scales::comma,
   #   colours = heat.colors(10, alpha = 0.65),
@@ -456,11 +459,11 @@ colfunc <- colorRampPalette(c("red", "yellow", "green"))
 
 # Plot
 treemaps %>%
-  mutate(sample_size = if_else(n_complete_only > 0, sample_size, 0)) %>% 
-  mutate_at(vars(sample_size), na_if, 0) %>% 
+  mutate(n_trials = if_else(n_complete_only > 0, n_trials, 0L)) %>% 
+  mutate_at(vars(n_trials), na_if, 0) %>% 
   ggplot(aes(
     area = dalys, 
-    fill = sample_size,
+    fill = n_trials,
     label = level_three,
     subgroup = level_two,
   ), color = "white") +
@@ -471,19 +474,20 @@ treemaps %>%
     grow = F, 
     reflow = T, 
     min.size = 1,
+    family = "Times",
+    fontface = "bold",
     padding.x = unit(2, units = "mm"),
     padding.y = unit(2, units = "mm"),
   ) +
   geom_treemap_subgroup_border(color = "white", size = 5) +
-  labs(fill = "Total sample") +
-  theme(legend.title = element_text(vjust = 2)) +
   scale_fill_gradient(
     low = "#F2DF91",
     high = "#CE0A04",
     na.value = "grey90",
-    name = "Total sample",
+    name = "Number of trials",
     labels = scales::comma
-  )
+  ) +
+  theme(legend.title = element_text(vjust = 2))
   # scale_fill_gradientn(
   #   labels = scales::comma,
   #   colours = heat.colors(10, alpha = 0.65),
@@ -534,7 +538,7 @@ treemaps %<>%
   group_by(level_two, level_three, level_four, dalys) %>% 
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
-    n_studies = sum(!is.na(n_sample)),
+    n_trials = sum(!is.na(n_sample)),
     n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
   ) %>% 
@@ -579,15 +583,15 @@ colfunc <- colorRampPalette(c("red", "yellow", "green"))
 
 # Plot
 treemaps %>%
-  mutate_at(vars(sample_size), na_if, 0) %>%
+  mutate_at(vars(n_trials), na_if, 0) %>%
   drop_na(level_two, level_three) %>% 
   ggplot(aes(
     area = dalys, 
-    fill = sample_size,
+    fill = n_trials,
     label = level_four,
     subgroup = level_two,
     subgroup2 = level_three
-  ), color = "white") +
+  )) +
   geom_treemap(color = "white", size = 1) +
   geom_treemap_text(
     colour = "grey20", 
@@ -595,20 +599,21 @@ treemaps %>%
     grow = F, 
     reflow = T, 
     min.size = 1,
+    family = "Times",
+    fontface = "bold",
     padding.x = unit(2, units = "mm"),
     padding.y = unit(2, units = "mm"),
   ) +
   geom_treemap_subgroup_border(color = "white", size = 5) +
   geom_treemap_subgroup2_border(color = "white", size = 2) +
-  labs(fill = "Total sample") +
-  theme(legend.title = element_text(vjust = 2)) +
   scale_fill_gradient(
     low = "#F2DF91",
     high = "#CE0A04",
     na.value = "grey90",
-    name = "Total sample",
+    name = "Number of trials",
     labels = scales::comma
-  )
+  ) +
+  theme(legend.title = element_text(vjust = 2))
   # scale_fill_gradientn(
   #   labels = scales::comma,
   #   colours = heat.colors(10, alpha = 0.65),
@@ -633,11 +638,11 @@ colfunc <- colorRampPalette(c("red", "yellow", "green"))
 
 # Plot
 treemaps %>%
-  mutate_at(vars(sample_size), na_if, 0) %>%
+  mutate_at(vars(n_trials), na_if, 0) %>%
   drop_na(level_two, level_three) %>% 
   ggplot(aes(
     area = dalys, 
-    fill = sample_size,
+    fill = n_trials,
     label = level_four,
     subgroup = level_two,
     subgroup2 = level_three
@@ -649,20 +654,21 @@ treemaps %>%
     grow = F,
     reflow = T, 
     min.size = 1,
+    family = "Times",
+    fontface = "bold",
     padding.x = unit(2, units = "mm"),
     padding.y = unit(2, units = "mm"),
     show.legend = T
   ) +
   geom_treemap_subgroup_border(color = "white", size = 5) +
   geom_treemap_subgroup2_border(color = "white", size = 2) +
-  labs(fill = "Total sample") +
   guides(color = guide_legend(override.aes = list(size = 3))) +
   theme(legend.title = element_text(vjust = 2)) +
   scale_fill_gradient(
     low = "#F2DF91",
     high = "#CE0A04",
     na.value = "grey90",
-    name = "Total sample",
+    name = "Number of trials",
     labels = scales::comma
   ) +
   scale_color_manual(
