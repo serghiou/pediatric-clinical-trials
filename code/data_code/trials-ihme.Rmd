@@ -232,12 +232,12 @@ library(tidyverse)
 
 # Import data
 trials <- read_excel(
-  "../../data/interim_data/categorizations_08132020_conditions.xlsx",
+  "../../data/interim_data/pediatric-rcts_2020-08-13.xlsx",
   sheet = 1
 )
 
 trials_by_income <- read_excel(
-  "../../data/interim_data/trials-by-income-status.xlsx",
+  "../../data/interim_data/pediatric-rcts_income-status.xlsx",
   sheet = 1
 )
 ```
