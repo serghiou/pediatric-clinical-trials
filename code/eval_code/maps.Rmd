@@ -247,7 +247,8 @@ Create data.
 ```{r}
 # Get map
 heat_map <-
-  trials %>% 
+  trials %>%
+  filter(is_eligible) %>% 
   select(nct_id, starts_with("location"), n_sample) %>%
   pivot_longer(starts_with("location"), "entity", values_to = "region") %>%
   separate_rows(region, sep = "; ") %>% 
