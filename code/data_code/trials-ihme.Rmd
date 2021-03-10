@@ -235,6 +235,11 @@ trials <- read_excel(
   "../../data/interim_data/categorizations_08132020_conditions.xlsx",
   sheet = 1
 )
+
+trials_by_income <- read_excel(
+  "../../data/interim_data/trials-by-income-status.xlsx",
+  sheet = 1
+)
 ```
 
 
@@ -423,13 +428,28 @@ trials %<>%
 
 ```{r}
 trials %<>%
-  mutate(is_developed = is.na(country_development_lessdeveloped)) %>%
+  left_join(trials_by_income) %>% 
+  select(-development_status, -development_status_investigators) %>% 
+  rename(country_income_class = development_status_participants_WORLDBANK) %>% 
+  mutate(country_income_class = case_when(
+    country_income_class == "highly_developed" ~ "HIC",
+    country_income_class == "less_developed" ~ "LMIC",
+    country_income_class == "MIXED" ~ "HIC and LMIC",
+    country_income_class == "notreported" ~ "Unreported",
+    is.na(country_income_class) ~ NA_character_
+  )) %>% 
+  mutate(is_HIC = case_when(
+    country_income_class == "HIC" ~ T,
+    country_income_class == "LMIC" ~ F,
+    TRUE ~ NA
+  )) %>%
   mutate(is_eastern_europe = !is.na(country_development_easterneurope)) %>%
   mutate(is_asian_tiger = !is.na(country_development_asiantiger)) %>%
-  select(-starts_with("country_")) %>% 
+  select(-starts_with("country_dev")) %>% 
   select(
     nct_id:age_stelios, 
-    is_developed:is_asian_tiger, 
+    country_income_class,
+    is_HIC:is_asian_tiger, 
     starts_with("location"), all_cities, everything()
   )
 ```

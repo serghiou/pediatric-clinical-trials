@@ -411,7 +411,7 @@ heat_map %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/maps_countries_with-names_chosen.jpg",
+  "../../output/figure_output/maps_countries_with-names_chosen.pdf",
   width = 18,
   height = 10
   )
@@ -464,7 +464,7 @@ heat_map %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/maps_countries_without-names.jpg",
+  "../../output/figure_output/maps_countries_without-names.pdf",
   width = 18,
   height = 10
   )

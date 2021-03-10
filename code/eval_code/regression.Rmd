@@ -233,46 +233,75 @@ library(treemapify)
 
 
 # Import data
-trials <- read_csv(
-  "../../data/tidy_data/trials-ihme.csv"
-)
-
-ihme <- read_csv(
-  "../../data/tidy_data/ihme.csv", 
-  col_types = cols(ihme_id = col_character(), who_id = col_character())
-)
-
-who <- read_csv(
-  "../../data/tidy_data/who.csv", 
-  col_types = cols(ID = col_character())
-)
+trials <- read_csv("../../data/tidy_data/trials-ihme.csv")
 ```
 
 
 ***
 
 
-# Create dataset
+# Create datasets
 
-## All studies
+## All trials
+
+Income class.
+
+```{r}
+trials %>% 
+  filter(is_eligible & is_classified) %>%
+  count(country_income_class, sort = T) %>% 
+  sable()
+```
+
+```{r}
+trials %>% 
+  filter(is_eligible & is_classified) %>%
+  filter(country_income_class == "Unreported") %>% 
+  select(country_income_class, nct_id) %>% 
+  sable(drop = T)
+```
+
+Studies contributing to more than one IHME level three category.
+
+```{r}
+trials %>%
+  bind_rows(trials, .id = "id_dev") %>%
+  filter(is_eligible & is_classified) %>%
+  filter(country_income_class != "Unreported") %>% 
+  mutate(
+      dev = country_income_class,
+      dev = if_else(id_dev == 2, "All", dev)
+  ) %>%
+  filter(dev != "HIC and LMIC") %>% 
+  filter(str_detect(ihme_level_three, ";")) %>% 
+  select(nct_id, ihme_level_three, country_income_class) %>% 
+  sable()
+```
+
+
+The unreported will be removed. Note that `is_eligible` refers to all trials deemed eligible for analysis (as per manuscript eligibility criteria) and `is_classified` refers to studies that were successfully classified into an IHME disease category.
 
 ```{r}
 # Create an appropriate IHME
 ihme_dev <- 
   list(
-    `More developed` = ihme,
-    `Less developed` = ihme,
+    `HIC` = ihme,  # high-income countries
+    `LMIC` = ihme, # low-middle income countries
     `All` = ihme
   ) %>% 
   bind_rows(.id = "dev")
 
 # Create duplicated dataset
 regression <-
-  trials %>% 
-  mutate(dev = if_else(is_developed, "More developed", "Less developed")) %>% 
+  trials %>%
   bind_rows(trials, .id = "id_dev") %>%
-  mutate(dev = if_else(id_dev == 2, "All", dev)) %>% 
-  filter(is_eligible, is_classified) %>%
+  filter(is_eligible & is_classified) %>%
+  filter(country_income_class != "Unreported") %>% 
+  mutate(
+    dev = country_income_class,
+    dev = if_else(id_dev == 2, "All", dev)
+  ) %>%
+  filter(dev != "HIC and LMIC") %>% 
   separate_rows(ihme_level_three, sep = "; ") %>%
   select(-condition) %>%
   right_join(ihme_dev, by = c("ihme_level_three" = "ihme_id", "dev")) %>%
@@ -291,7 +320,7 @@ regression %<>%
     p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
   ) %>% 
   mutate(complete_enroll = case_when(
-    is.na(p_complete_enroll) | is.nan(p_complete_enroll)  ~ NA_character_,
+    is.na(p_complete_enroll) | is.nan(p_complete_enroll) ~ NA_character_,
     p_complete_enroll > 0.5 ~ ">50%",
     p_complete_enroll < 0.25 ~ "0-25%",
     T ~ "25-50%"
@@ -305,14 +334,23 @@ glimpse(regression)
 ```
 
 
-## Completed studies
+```{r}
+regression %>% 
+  group_by(dev) %>%
+  summarise(total_trials = sum(n_trials), total_sample = sum(sample_size)) %>% 
+  sable()
+```
+
+
+
+## Completed trials
 
 ```{r}
 # Create an appropriate IHME
 ihme_dev <- 
   list(
-    `More developed` = ihme,
-    `Less developed` = ihme,
+    `HIC` = ihme,
+    `LMIC` = ihme,
     `All` = ihme
   ) %>% 
   bind_rows(.id = "dev")
@@ -320,11 +358,15 @@ ihme_dev <-
 # Create duplicated dataset
 regression_completed <-
   trials %>% 
-  filter(status_final == "Completed") %>% 
-  mutate(dev = if_else(is_developed, "More developed", "Less developed")) %>% 
   bind_rows(trials, .id = "id_dev") %>%
-  mutate(dev = if_else(id_dev == 2, "All", dev)) %>% 
-  filter(is_eligible, is_classified) %>%
+  filter(status_final == "Completed") %>% 
+  filter(is_eligible & is_classified) %>%
+  filter(country_income_class != "Unreported") %>% 
+  mutate(
+    dev = country_income_class,
+    dev = if_else(id_dev == 2, "All", dev)
+  ) %>%
+  filter(dev != "HIC and LMIC") %>% 
   separate_rows(ihme_level_three, sep = "; ") %>%
   select(-condition) %>%
   right_join(ihme_dev, by = c("ihme_level_three" = "ihme_id", "dev")) %>%
@@ -332,7 +374,6 @@ regression_completed <-
   mutate(level_three = condition) %>% 
   left_join(select(who, ID, level_two), by = c("who_id" = "ID")) %>% 
   mutate(n_sample_adjust = n_sample / n_level_three)
-
 
 # Summarize values
 regression_completed %<>%
@@ -363,7 +404,7 @@ glimpse(regression_completed)
 
 # Tables
 
-## Sample per development
+## Sample per income status
 
 ```{r}
 regression %>%
@@ -375,7 +416,7 @@ regression %>%
 ```
 
 
-# Plots for all
+# Plots for all trials
 
 ## Boxplot
 
@@ -389,7 +430,7 @@ regression %>%
   scale_y_continuous(labels = scales::comma)
 
 # Save
-ggsave("../../output/figure_output/regression_boxplot_sample-size.jpg")
+ggsave("../../output/figure_output/regression_boxplot_sample-size.pdf")
 ```
 
 
@@ -408,7 +449,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_2d-histogram.jpg",
+  "../../output/figure_output/regression_2d-histogram.pdf",
   width = 8,
   height = 6
 )
@@ -427,7 +468,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_2d-histogram_stratified.jpg",
+  "../../output/figure_output/regression_2d-histogram_stratified.pdf",
   width = 8,
   height = 6
 )
@@ -449,7 +490,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_original.jpg",
+  "../../output/figure_output/regression_original.pdf",
   width = 13,
   height = 8
 )
@@ -493,7 +534,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_original_nb.jpg",
+  "../../output/figure_output/regression_original_nb.pdf",
   width = 13,
   height = 8
 )
@@ -525,7 +566,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_original_enrollment.jpg",
+  "../../output/figure_output/regression_original_enrollment.pdf",
   width = 13,
   height = 8
 )
@@ -553,7 +594,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_log.jpg",
+  "../../output/figure_output/regression_log.pdf",
   width = 13,
   height = 8
 )
@@ -586,7 +627,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_log_enrollment.jpg",
+  "../../output/figure_output/regression_log_enrollment.pdf",
   width = 13,
   height = 8
 )
@@ -630,7 +671,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_log_poisson_chosen.jpg",
+  "../../output/figure_output/regression_log_poisson_chosen.pdf",
   width = 13,
   height = 8
 )
@@ -680,7 +721,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_log_poisson_enrollment_chosen.jpg",
+  "../../output/figure_output/regression_log_poisson_enrollment_chosen.pdf",
   width = 13,
   height = 8
 )
@@ -745,7 +786,7 @@ regression %>%
 regression %>%
   filter(dev != "All") %>% 
   pivot_wider(id_col = dalys, names_from = dev, values_from = n_trials) %>% 
-  mutate(n_trials_diff = `More developed` - `Less developed`) %>% 
+  mutate(n_trials_diff = `HIC` - `LMIC`) %>% 
   ggplot(aes(x = dalys, y = n_trials_diff)) +
   geom_col(width = 1000000)
 ```
@@ -757,7 +798,7 @@ regression %>%
 regression %>%
   filter(dev != "All") %>% 
   pivot_wider(id_col = dalys, names_from = dev, values_from = n_trials) %>%
-  mutate(n_trials_diff = `More developed` - `Less developed`) %>% 
+  mutate(n_trials_diff = `HIC` - `LMIC`) %>% 
   ggplot(aes(x = dalys, y = n_trials_diff)) +
   stat_summary_bin(
     fun.data = "median_hilow", 
@@ -773,7 +814,7 @@ regression %>%
     labels = scales::comma
   ) +
   xlab("Log-transformed DALYs (millions)") +
-  ylab("Number of trials in more - less developed")
+  ylab("Number of trials in HIC - LMIC")
 ```
 
 
@@ -781,7 +822,7 @@ regression %>%
 regression %>%
   filter(dev != "All") %>% 
   pivot_wider(id_col = dalys, names_from = dev, values_from = n_trials) %>%
-  mutate(n_trials_diff = `More developed` - `Less developed`) %>% 
+  mutate(n_trials_diff = `HIC` - `LMIC`) %>% 
   ggplot(aes(x = dalys, y = n_trials_diff)) +
   stat_summary_bin(
     fun.data = "median_hilow", 
@@ -805,7 +846,7 @@ regression %>%
     labels = scales::comma
   ) +
   xlab("Log-transformed DALYs (millions)") +
-  ylab("Number of trials in more - less developed")
+  ylab("Number of trials in HIC - LMIC")
 ```
 
 
@@ -815,13 +856,13 @@ regression %>%
 regression %>%
   filter(dev != "All") %>% 
   pivot_wider(id_col = dalys, names_from = dev, values_from = n_trials) %>% 
-  mutate(n_trials_diff = `More developed` - `Less developed`) %>% 
+  mutate(n_trials_diff = `HIC` - `LMIC`) %>% 
   mutate(daly_groups = cut(dalys, 10)) %>% 
   ggplot(aes(x = dalys, y = n_trials_diff, group = daly_groups)) + 
   geom_boxplot(outlier.shape = NA, color = "grey40", fill = "grey80") +
   geom_jitter(color = "red", alpha = 0.5, stroke = 0, size = 2) +
   xlab("DALYs (millions)") +
-  ylab("Number of trials in more - less developed") +
+  ylab("Number of trials in HIC - LMIC") +
   scale_y_continuous(
     labels = scales::comma
   ) +
@@ -831,7 +872,7 @@ regression %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_binned.jpg",
+  "../../output/figure_output/regression_binned.pdf",
   width = 13,
   height = 8
 )
@@ -878,7 +919,7 @@ regression_completed %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_log_poisson_completed.jpg",
+  "../../output/figure_output/regression_log_poisson_completed.pdf",
   width = 13,
   height = 8
 )
@@ -926,7 +967,7 @@ regression_completed %>%
 
 # Save
 ggsave(
-  "../../output/figure_output/regression_log_poisson_enrollment_completed.jpg",
+  "../../output/figure_output/regression_log_poisson_enrollment_completed.pdf",
   width = 13,
   height = 8
 )
@@ -1006,9 +1047,9 @@ pvals %>%
   sable()
 ```
 
-This is a descriptive model, not a model appropriate for prediction or inference. Overall, with every million DALYs, there was a mean increase in total sample size ranging from 261 to 694 (Sandwich p-value, 0.00006). Even though, overall, the mean total sample size in more developed countries was smaller than that of less developed countries, these data do not suggest a simple linear relationship (Sandwich p-value, 0.6).
+This is a descriptive model, not a model appropriate for prediction or inference. Overall, with every million DALYs, there was a mean increase in total sample size ranging from 261 to 694 (Sandwich p-value, 0.00006). Even though, overall, the mean total sample size in HIC countries was smaller than that of less developed countries, these data do not suggest a simple linear relationship (Sandwich p-value, 0.6).
 
-<!-- Interpretation of the Poisson model: This table suggests that for every a million DALYs, the expected sample size increases by a median of 1.01 (95% CI, 1.008-1.02; P-value = 0.00002). It also suggests that in the observed trials, the sample size of studies from more developed countries was a median of 51% smaller than that of less developed countries, across levels of DALYs. However, this analysis does not suggest that this is generally true (95% CI, 0.17-1.44). No meaningful effect modification between DALYs and development was observed (95% CI, 0.99-1.01). -->
+<!-- Interpretation of the Poisson model: This table suggests that for every a million DALYs, the expected sample size increases by a median of 1.01 (95% CI, 1.008-1.02; P-value = 0.00002). It also suggests that in the observed trials, the sample size of studies from HIC countries was a median of 51% smaller than that of less developed countries, across levels of DALYs. However, this analysis does not suggest that this is generally true (95% CI, 0.17-1.44). No meaningful effect modification between DALYs and development was observed (95% CI, 0.99-1.01). -->
 
 
 ***
@@ -1016,22 +1057,52 @@ This is a descriptive model, not a model appropriate for prediction or inference
 
 # Spearman correlation
 
+## All trials
+
+Estimate correlation.
+
 ```{r}
 regression %>% 
-  filter(dev != "all") %$% 
-  cor.test(n_trials, dalys, method = "spearman") %>% 
-  broom::tidy() %>% 
+  group_by(dev) %>%
+  summarise({
+    cor.test(n_trials, dalys, method = "spearman") %>% broom::tidy()
+  }) %>% 
   sable()
 ```
 
+Calculate number of trials and participants.
+
+```{r}
+regression %>% 
+  group_by(dev) %>%
+  summarise(total_trials = sum(n_trials), total_sample = sum(sample_size)) %>% 
+  sable()
+```
+
+
+## Completed trials
+
+Estimate correlation.
 
 ```{r}
 regression_completed %>% 
-  filter(dev != "all") %$% 
-  cor.test(n_trials, dalys, method = "spearman") %>% 
-  broom::tidy() %>% 
+  group_by(dev) %>%
+  summarise({
+    cor.test(n_trials, dalys, method = "spearman") %>% broom::tidy()
+  }) %>% 
   sable()
 ```
+
+
+Calculate number of trials and participants.
+
+```{r}
+regression_completed %>% 
+  group_by(dev) %>%
+  summarise(total_trials = sum(n_trials), total_sample = sum(sample_size)) %>% 
+  sable()
+```
+
 
 
 # Documentation {.tabset}

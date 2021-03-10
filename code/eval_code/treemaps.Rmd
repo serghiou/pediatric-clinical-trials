@@ -232,19 +232,7 @@ library(treemapify)
 
 
 # Import data
-trials <- read_csv(
-  "../../data/tidy_data/trials-ihme.csv"
-)
-
-ihme <- read_csv(
-  "../../data/tidy_data/ihme.csv", 
-  col_types = cols(ihme_id = col_character(), who_id = col_character())
-)
-
-who <- read_csv(
-  "../../data/tidy_data/who.csv", 
-  col_types = cols(ID = col_character())
-)
+trials <- read_csv("../../data/tidy_data/trials-ihme.csv")
 ```
 
 
@@ -385,7 +373,7 @@ treemaps %>%
   # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
   
 # Save
-ggsave("../../output/figure_output/treemaps_level-three.jpg")
+ggsave("../../output/figure_output/treemaps_level-three.pdf")
 ```
 
 
@@ -447,7 +435,7 @@ treemaps %>%
   # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
   
 # Save
-ggsave("../../output/figure_output/treemaps_level-three_enrollment_chosen.jpg")
+ggsave("../../output/figure_output/treemaps_level-three_enrollment_chosen.pdf")
 ```
 
 
@@ -500,7 +488,7 @@ treemaps %>%
   # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
   
 # Save
-ggsave("../../output/figure_output/treemaps_level-three_completed_chosen.jpg")
+ggsave("../../output/figure_output/treemaps_level-three_completed_chosen.pdf")
 ```
 
 ***
@@ -626,7 +614,7 @@ treemaps %>%
   # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
   
 # Save
-ggsave("../../output/figure_output/treemaps_level-four.jpg")
+ggsave("../../output/figure_output/treemaps_level-four.pdf")
 ```
 
 
@@ -688,7 +676,7 @@ treemaps %>%
   # scale_fill_gradient(low = "yellow", high = "red", na.value = "grey")
   
 # Save
-ggsave("../../output/figure_output/treemaps_level-four_enrollment.jpg")
+ggsave("../../output/figure_output/treemaps_level-four_enrollment.pdf")
 ```
 
 

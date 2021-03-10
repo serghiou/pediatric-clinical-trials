@@ -251,7 +251,7 @@ dim(paed)
 
 ```{r}
 # Import vaccine trials
-vaccine <- read_csv("../Data/clinicaltrials-pediatric-vaccine.csv")
+vaccine <- read_csv("../../data/raw_data/clinicaltrials-pediatric-vaccine.csv")
 dim(vaccine)
 ```
 
