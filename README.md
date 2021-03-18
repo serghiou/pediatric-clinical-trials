@@ -16,10 +16,16 @@ Within the "code" directory:
 Within the "data" directory:
 
 - **The master_pediatrics-rct_2021-03-18.xlsx file is the main data file and what should be used by anyone interested our data.**
-- "raw_data" contains all data downloaded from ClinicalTrials.gov.
+- "raw_data" contains all data downloaded from ClinicalTrials.gov using the [clinicaltrialr](https://github.com/serghiou/clinicaltrialr) package.
 - "external_data" contains relevant data gathered from alternative sources (e.g. IHME data).
 - "interim_data" contains all data synthesized together into meaningful tables.
 - "tidy_data" contains all data processed into an analytic dataset (i.e. a dataset appropriate for analysis).
+
+
+## Where to direct questions
+
+Please direct questions to the corresponding author.
+
 
 
 </div>
