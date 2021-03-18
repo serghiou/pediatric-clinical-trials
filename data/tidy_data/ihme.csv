@@ -1,0 +1,192 @@
+ihme_id,who_id,level,condition,dalys
+491,147,level_three,Cardiovascular diseases,4424509.5
+508,168,level_three,Chronic respiratory diseases,5659088.5
+974,230,level_three,Diabetes and kidney diseases,2446583
+526,178,level_three,Digestive diseases,6747012.5
+957,25,level_three,Enteric infections,63732876
+955,3,level_three,HIV/AIDS and Sexually transmitted infections,20307226
+962,76,level_three,Maternal and neonatal disorders,167268496
+558,207,level_three,Mental disorders,12540977
+626,269,level_three,Musculoskeletal disorders,2299156
+344,32,level_three,Neglected tropical diseases and malaria,40887880
+410,100,level_three,Neoplasms,9414291
+542,197,level_three,Neurological disorders,9354721
+386,94,level_three,Nutritional deficiencies,35458952
+961,58,level_three,Other infectious diseases,42063168
+640,276,level_three,Other non-communicable diseases,61494156
+956,16,level_three,Respiratory infections and tuberculosis,83648680
+717,349,level_three,Self-harm and interpersonal violence,5474592.5
+669,259,level_three,Sense organ diseases,3213884.25
+653,241,level_three,Skin and subcutaneous diseases,14061703
+973,222,level_three,Substance use disorders,71964.2265625
+688,320,level_three,Transport injuries,10306444
+696,328,level_three,Unintentional injuries,26893574
+297,17,level_four,Tuberculosis,6251205.5
+298,4,level_four,HIV/AIDS,10511186
+302,26,level_four,Diarrheal diseases,53583304
+321,31,level_four,Other intestinal infectious diseases,89239.2265625
+322,22,level_four,Lower respiratory infections,74189184
+328,23,level_four,Upper respiratory infections,2255267.75
+329,24,level_four,Otitis media,953025.125
+332,59,level_four,Meningitis,15421050
+337,64,level_four,Encephalitis,2857424.25
+338,65,level_four,Diphtheria,285341.625
+339,66,level_four,Whooping cough,7915658
+340,67,level_four,Tetanus,1764647.125
+341,68,level_four,Measles,8056174.5
+342,69,level_four,Varicella and herpes zoster,694346.1875
+345,33,level_four,Malaria,35718588
+346,34,level_four,Chagas disease,1278.9158935546875
+347,35,level_four,Leishmaniasis,389016.53125
+350,38,level_four,African trypanosomiasis,25563.4921875
+351,39,level_four,Schistosomiasis,138396.984375
+352,40,level_four,Cysticercosis,23526.529296875
+353,41,level_four,Cystic echinococcosis,23241.9609375
+354,42,level_four,Lymphatic filariasis,192381.3125
+355,43,level_four,Onchocerciasis,234137.140625
+356,44,level_four,Trachoma,0
+357,45,level_four,Dengue,1265580.25
+358,46,level_four,Yellow fever,166024.921875
+359,47,level_four,Rabies,315540
+360,48,level_four,Intestinal nematode infections,788067.4375
+364,52,level_four,Food-borne trematodiases,70877.359375
+365,57,level_four,Other neglected tropical diseases,1534343.25
+366,77,level_four,Maternal disorders,60670.25390625
+380,88,level_four,Neonatal disorders,167207824
+387,95,level_four,Protein-energy malnutrition,14229179
+388,96,level_four,Iodine deficiency,420324.90625
+389,NA,level_four,Vitamin A deficiency,8174224.5
+390,97,level_four,Dietary iron deficiency,12059134
+391,98,level_four,Other nutritional deficiencies,576089.8125
+393,9,level_four,Sexually transmitted infections excluding HIV,9796040
+400,70,level_four,Acute hepatitis,1814088.875
+405,53,level_four,Leprosy,194.746826171875
+408,75,level_four,Other unspecified infectious diseases,3254439.25
+411,104,level_four,Esophageal cancer,0
+414,105,level_four,Stomach cancer,0
+417,107,level_four,Liver cancer,126996.15625
+423,115,level_four,Larynx cancer,0
+426,116,level_four,"Tracheal, bronchus, and lung cancer",0
+429,121,level_four,Breast cancer,0
+432,122,level_four,Cervical cancer,0
+435,123,level_four,Uterine cancer,0
+438,125,level_four,Prostate cancer,0
+441,106,level_four,Colon and rectum cancer,0
+444,101,level_four,Lip and oral cavity cancer,0
+447,102,level_four,Nasopharynx cancer,37686.08203125
+450,103,level_four,Other pharynx cancer,0
+453,113,level_four,Gallbladder and biliary tract cancer,0
+456,114,level_four,Pancreatic cancer,0
+459,117,level_four,Malignant skin melanoma,0
+462,118,level_four,Non-melanoma skin cancer,0
+465,124,level_four,Ovarian cancer,0
+468,126,level_four,Testicular cancer,0
+471,127,level_four,Kidney cancer,247005.578125
+474,128,level_four,Bladder cancer,0
+477,129,level_four,Brain and nervous system cancer,1790967.5
+480,130,level_four,Thyroid cancer,13612.294921875
+483,131,level_four,Mesothelioma,0
+484,132,level_four,Hodgkin lymphoma,234198.484375
+485,133,level_four,Non-Hodgkin lymphoma,926669.75
+486,134,level_four,Multiple myeloma,0
+487,135,level_four,Leukemia,3231161.75
+489,141,level_four,Other malignant neoplasms,2485849.75
+490,142,level_four,Other neoplasms,320144.0625
+492,148,level_four,Rheumatic heart disease,722839.75
+493,149,level_four,Ischemic heart disease,0
+494,150,level_four,Stroke,1268378
+498,154,level_four,Hypertensive heart disease,0
+499,159,level_four,Cardiomyopathy and myocarditis,1090626.5
+500,163,level_four,Atrial fibrillation and flutter,0
+501,164,level_four,Aortic aneurysm,0
+502,165,level_four,Peripheral artery disease,0
+503,166,level_four,Endocarditis,429686.8125
+504,155,level_four,Non-rheumatic valvular heart disease,0
+507,167,level_four,Other cardiovascular and circulatory diseases,912978.6875
+509,169,level_four,Chronic obstructive pulmonary disease,443646.65625
+510,170,level_four,Pneumoconiosis,0.7829598784446716
+515,175,level_four,Asthma,4515994
+516,176,level_four,Interstitial lung disease and pulmonary sarcoidosis,50273.29296875
+520,177,level_four,Other chronic respiratory diseases,649174
+521,179,level_four,Cirrhosis and other chronic liver diseases,1446631.5
+529,189,level_four,Appendicitis,451816.625
+530,190,level_four,Paralytic ileus and intestinal obstruction,2478891
+531,191,level_four,"Inguinal, femoral, and abdominal hernia",654898.6875
+532,192,level_four,Inflammatory bowel disease,108317.4921875
+533,193,level_four,Vascular intestinal disorders,45251.73046875
+534,194,level_four,Gallbladder and biliary diseases,114713.4296875
+535,195,level_four,Pancreatitis,42039.62109375
+541,196,level_four,Other digestive diseases,417837.90625
+543,198,level_four,Alzheimer's disease and other dementias,0
+544,199,level_four,Parkinson's disease,0
+545,200,level_four,Epilepsy,4303606
+546,201,level_four,Multiple sclerosis,1204.617431640625
+554,202,level_four,Motor neuron disease,65590.6796875
+557,206,level_four,Other neurological disorders,1377744.5
+559,208,level_four,Schizophrenia,25310.255859375
+560,223,level_four,Alcohol use disorders,53256.16015625
+561,224,level_four,Drug use disorders,18708.06640625
+567,209,level_four,Depressive disorders,1546960.125
+570,212,level_four,Bipolar disorder,363904.625
+571,213,level_four,Anxiety disorders,3164615.25
+572,214,level_four,Eating disorders,142226.265625
+575,217,level_four,Autism spectrum disorders,1419779.5
+578,218,level_four,Attention-deficit/hyperactivity disorder,319666.03125
+579,219,level_four,Conduct disorder,3997334
+582,220,level_four,Idiopathic developmental intellectual disability,1501388.375
+585,221,level_four,Other mental disorders,59792.35546875
+587,231,level_four,Diabetes mellitus,429554.46875
+588,240,level_four,Acute glomerulonephritis,47855.640625
+589,234,level_four,Chronic kidney disease,1969172.875
+594,289,level_four,Urinary diseases and male infertility,1026768.4375
+603,295,level_four,Gynecological diseases,6019.9609375
+613,303,level_four,Hemoglobinopathies and hemolytic anemias,4206058
+619,311,level_four,"Endocrine, metabolic, blood, and immune disorders",2248267.5
+627,270,level_four,Rheumatoid arthritis,34194.88671875
+628,271,level_four,Osteoarthritis,0
+630,272,level_four,Low back pain,1857845.375
+631,273,level_four,Neck pain,209044.546875
+632,274,level_four,Gout,0
+639,275,level_four,Other musculoskeletal disorders,198071.265625
+641,277,level_four,Congenital birth defects,49775704
+654,242,level_four,Dermatitis,4889841
+655,246,level_four,Psoriasis,478712.75
+658,250,level_four,Scabies,1326614.75
+659,251,level_four,Fungal skin diseases,1146035.125
+660,252,level_four,Viral skin diseases,2467220.5
+661,253,level_four,Acne vulgaris,458405.4375
+662,254,level_four,Alopecia areata,41645.92578125
+663,255,level_four,Pruritus,105594.734375
+664,256,level_four,Urticaria,2149648.75
+665,257,level_four,Decubitus ulcer,23498.90234375
+668,258,level_four,Other skin and subcutaneous diseases,346691.9375
+674,267,level_four,Age-related and other hearing loss,1507645.25
+679,268,level_four,Other sense organ diseases,199721.390625
+680,312,level_four,Oral disorders,737072.3125
+686,318,level_four,Sudden infant death syndrome,3494265
+689,321,level_four,Road injuries,9346291
+695,327,level_four,Other transport injuries,960153.4375
+697,329,level_four,Falls,3608307.25
+698,330,level_four,Drowning,9037718
+699,331,level_four,"Fire, heat, and hot substances",2184974.25
+700,332,level_four,Poisonings,1181196
+704,335,level_four,Exposure to mechanical forces,1996383.5
+708,338,level_four,Adverse effects of medical treatment,1466394.75
+709,339,level_four,Animal contact,1715227.125
+712,342,level_four,Foreign body,3860522.75
+716,348,level_four,Other unintentional injuries,1177608.875
+718,350,level_four,Self-harm,614859.375
+724,353,level_four,Interpersonal violence,2128161.25
+729,347,level_four,Exposure to forces of nature,196552.71875
+842,346,level_four,Environmental heat and cold exposure,468688.6875
+843,54,level_four,Ebola,285.8512878417969
+854,359,level_four,Executions and police conflict,95570.203125
+935,55,level_four,Zika virus,834.8369140625
+936,56,level_four,Guinea worm disease,0.025577744469046593
+945,358,level_four,Conflict and terrorism,2636001.75
+958,27,level_four,Typhoid and paratyphoid,6549243.5
+959,30,level_four,Invasive Non-typhoidal Salmonella (iNTS),3511085.75
+972,203,level_four,Headache disorders,3606574.75
+980,247,level_four,Bacterial skin diseases,627793.3125
+981,260,level_four,Blindness and vision impairment,1506517.625
+992,185,level_four,Upper digestive system diseases,986614.25

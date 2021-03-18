@@ -233,7 +233,19 @@ library(treemapify)
 
 
 # Import data
-trials <- read_csv("../../data/tidy_data/trials-ihme.csv")
+trials <- read_csv(
+  "../../data/tidy_data/trials-ihme.csv"
+)
+
+ihme <- read_csv(
+  "../../data/tidy_data/ihme.csv",
+  col_types = cols(ihme_id = col_character(), who_id = col_character())
+)
+
+who <- read_csv(
+  "../../data/tidy_data/who.csv",
+  col_types = cols(ID = col_character())
+)
 ```
 
 
@@ -258,7 +270,7 @@ trials %>%
   filter(is_eligible & is_classified) %>%
   filter(country_income_class == "Unreported") %>% 
   select(country_income_class, nct_id) %>% 
-  sable(drop = T)
+  sable()
 ```
 
 Studies contributing to more than one IHME level three category.
@@ -316,8 +328,8 @@ regression %<>%
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
     n_trials = sum(!is.na(n_sample)),  # avoid counting conditions with no trial
-    n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
-    p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
+    n_complete_enroll = sum(str_detect(status_final_12052020, "C|E|R"), na.rm = T),
+    p_complete_enroll = mean(str_detect(status_final_12052020, "C|E|R"), na.rm = T)
   ) %>% 
   mutate(complete_enroll = case_when(
     is.na(p_complete_enroll) | is.nan(p_complete_enroll) ~ NA_character_,
@@ -359,7 +371,7 @@ ihme_dev <-
 regression_completed <-
   trials %>% 
   bind_rows(trials, .id = "id_dev") %>%
-  filter(status_final == "Completed") %>% 
+  filter(status_final_12052020 == "Completed") %>% 
   filter(is_eligible & is_classified) %>%
   filter(country_income_class != "Unreported") %>% 
   mutate(
@@ -381,8 +393,8 @@ regression_completed %<>%
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
     n_trials = sum(!is.na(n_sample)),  # avoid counting conditions with no trial
-    n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
-    p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
+    n_complete_enroll = sum(str_detect(status_final_12052020, "C|E|R"), na.rm = T),
+    p_complete_enroll = mean(str_detect(status_final_12052020, "C|E|R"), na.rm = T)
   ) %>% 
   mutate(complete_enroll = case_when(
     is.na(p_complete_enroll) | is.nan(p_complete_enroll)  ~ NA_character_,

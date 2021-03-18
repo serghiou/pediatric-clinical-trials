@@ -1,5 +1,5 @@
 ---
-title: 'Pediatric clinical trials: Prepare trial data for analysis'
+title: 'Pediatric clinical trials: Prepare IHME data for analysis'
 author: "Stylianos Serghiou"
 date: '`r format(Sys.time(), "%d/%m/%Y")`'
 output:
@@ -231,9 +231,14 @@ library(readxl)
 library(tidyverse)
 
 # Import data
-trials <- read_excel(
-  "../../data/master_pediatric-rcts_2021-03-18.xlsx",
-  sheet = 1
+level_three <- read_excel(
+  "../../data/external_data/ihme-cookbook.xlsx",
+  sheet = "Level_three"
+)
+
+level_four <- read_excel(
+  "../../data/external_data/ihme-cookbook.xlsx",
+  sheet = "Level_four"
 )
 ```
 
@@ -241,210 +246,47 @@ trials <- read_excel(
 ***
 
 
-# General
+# Level three
 
 ```{r}
-trials %<>%
-  drop_na(nct_id) %>% 
+level_three %<>%
   rename(
-    ihmelevel3C_code = `ihmelevel3C _code`
+    ihme_id = IHME_code,
+    who_id = SC_coding,
+    condition = level_three,
+    dalys = DALYS_level3
+  )
+```
+
+
+***
+
+
+# Level four
+
+```{r}
+level_four %<>%
+  rename(
+    ihme_id = IHME_code,
+    who_id = SC_coding,
+    condition = level_four,
+    dalys = DALYS_level4
   ) %>% 
-  select(
-    -`sc_outcome (mortality, co-mortality, composite, non-mortality)`,
-    -`sc_outcome_secondary(mortality, co-mortality, composite, non-mortality)`
-  )
+  select(-`...5`)
 ```
 
 
 ***
 
 
-# Eligibility
+# Join
 
 ```{r}
-trials %<>%
-  mutate(is_eligible = T) %>% 
-  select(nct_id, is_eligible, everything())
-```
-
-
-***
-
-
-# Classified
-
-Studies that could not be classified into specific disease buckets.
-
-```{r}
-trials %<>% 
-  mutate(is_classified = ihmelevel3A_code != "unclassified") %>%
-  relocate(is_classified, .after = is_eligible)
-```
-
-
-***
-
-
-# Conditions
-
-Rename appropriately and combine levels into a single column.
-
-```{r}
-trials %<>%
-  rename(
-    who_level_three = level3_split_categories_sc,
-    who_level_four = level4_split_categories_sc,
-  ) %>%
-  mutate(across(ihmelevel4A_code:ihmelevel4E_code, na_if, "unclassified")) %>% 
-  unite(
-    col = "ihme_level_four", 
-    ihmelevel4A_code:ihmelevel4E_code, 
-    sep = "; ", 
-    na.rm = T
-  ) %>%
-  mutate(across(ihmelevel3A_code:ihmelevel3D_code, na_if, "unclassified")) %>% 
-  unite(
-    col = "ihme_level_three",  
-    ihmelevel3A_code:ihmelevel3D_code, 
-    sep = "; ",
-    na.rm = T
-  ) %>%
-  mutate(across(starts_with("ihme_level_"), na_if, "")) %>% 
-  select(
-    nct_id:is_classified, 
-    who_level_three, who_level_four,
-    ihme_level_three, ihme_level_four,
-    everything()
-  )
-```
-
-
-***
-
-
-# Sample size
-
-```{r}
-trials %<>%
-  select(-combined_samplesize, -starts_with("populationsplit")) %>%
-  rename(
-    n_level_three = denominator_level3,
-    n_level_four = denominator_level4
-  ) %>% 
-  mutate(across(starts_with("enroll"), na_if, '0')) %>% 
-  mutate(n_sample = coalesce(
-    enrollment_extracted_publication_sc,
-    enrollment_actual, 
-    enrollment_estimated
-  )) %>%
-  select(nct_id:ihme_level_four, starts_with("n_"), everything())
-```
-
-
-***
-
-
-# Country
-
-Create function to act across a dataframe.
-
-```{r}
-fix_country_df <- function(.data, col) {
-  
-  col <- ensym(col)
-  
-  temp <-
-    .data %>%
-    select(nct_id, region = !!col) %>%
-    mutate_at(
-      vars(region), 
-      stringr::str_replace_all("([a-zA-Z]);([a-zA-Z])", "\\1; \\2")
-    ) %>%
-    separate_rows(region, sep = "; ") %>%
-    mutate_at(vars(region), str_squish) %>%
-    mutate_at(vars(region), stringr::str_remove_all, "_") %>%
-    mutate_at(vars(region), na_if, "notprovided") %>%
-    mutate_at(vars(region), str_remove, ";|\\*") %>%
-    mutate_at(vars(region), str_replace, "United States", "USA") %>%
-    mutate_at(vars(region), str_replace, "Untied States", "USA") %>%
-    mutate_at(vars(region), str_replace, "^United Kin[a-z]+$", "UK") %>%
-    mutate_at(vars(region), str_replace, "^London$", "UK") %>%
-    mutate_at(vars(region), str_replace, "^Cz[a-z]+$", "Czech Republic") %>%
-    mutate_at(vars(region), str_replace, "Hong Kong", "China") %>%
-    mutate_at(vars(region), str_replace, "The Gambia", "Gambia") %>%
-    mutate_at(vars(region), str_replace, "f Congo", "f the Congo") %>%
-    mutate_at(vars(region), str_replace, "Isreal", "Israel") %>%
-    group_by(nct_id) %>%
-    summarise(region = paste(region, collapse = "; "))
-  
-  .data %>%
-    full_join(temp) %>%
-    mutate(!!col := region) %>% 
-    select(-region)
-}
-```
-
-
-Create function to act across a vector.
-
-```{r}
-fix_country <- function(x) {
-  
-  x %>%
-    stringr::str_replace_all("([a-zA-Z]);([a-zA-Z])", "\\1; \\2") %>%
-    str_split("; ") %>% 
-    map(stringr::str_squish) %>%
-    map(stringr::str_remove_all, "_") %>%
-    map(na_if, "notprovided") %>%
-    map(str_remove, ";|\\*") %>%
-    map(str_replace, "United States", "USA") %>%
-    map(str_replace, "Untied States", "USA") %>%
-    map(str_replace, "^United Kin[a-z]+$", "UK") %>%
-    map(str_replace, "^London$", "UK") %>%
-    map(str_replace, "^Cz[a-z]+$", "Czech Republic") %>%
-    map(str_replace, "Hong Kong", "China") %>%
-    map(str_replace, "The Gambia", "Gambia") %>%
-    map(str_replace, "f Congo", "f the Congo") %>%
-    map(str_replace, "Isreal", "Israel") %>% 
-    map_chr(paste, collapse = "; ")
-}
-```
-
-
-Fix country across columns.
-
-```{r}
-trials %<>% mutate(across(starts_with('location_'), fix_country))
-```
-
-
-***
-
-
-# Development
-
-```{r}
-trials %<>%
-  rename(country_income_class = development_status_investigators) %>% 
-  mutate(country_income_class = case_when(
-    country_income_class == "highly_developed" ~ "HIC",
-    country_income_class == "less_developed" ~ "LMIC",
-    country_income_class == "MIXED" ~ "HIC and LMIC",
-    country_income_class == "unavailable" ~ "Unavailable",
-    is.na(country_income_class) ~ NA_character_
-  )) %>% 
-  mutate(is_HIC = case_when(
-    country_income_class == "HIC" ~ T,
-    country_income_class == "LMIC" ~ F,
-    TRUE ~ NA
-  )) %>%
-  select(-starts_with("country_dev")) %>% 
-  select(
-    nct_id, age_category, status_final_12052020,
-    is_eligible:n_sample,
-    country_income_class, is_HIC, 
-    starts_with("location"), everything()
-  )
+ihme <- 
+  level_three %>% 
+  bind_rows(level_four, .id = "level") %>% 
+  mutate(level = if_else(level == "1", "level_three", "level_four")) %>% 
+  select(ihme_id, who_id, level, condition, dalys)
 ```
 
 
@@ -454,7 +296,7 @@ trials %<>%
 # Final
 
 ```{r}
-glimpse(trials)
+glimpse(ihme)
 ```
 
 
@@ -464,7 +306,7 @@ glimpse(trials)
 # Save
 
 ```{r save}
-write_csv(trials, "../../data/tidy_data/trials-ihme.csv")
+write_csv(ihme, "../../data/tidy_data/ihme.csv")
 ```
 
 

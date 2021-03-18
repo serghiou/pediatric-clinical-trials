@@ -232,7 +232,19 @@ library(treemapify)
 
 
 # Import data
-trials <- read_csv("../../data/tidy_data/trials-ihme.csv")
+trials <- read_csv(
+  "../../data/tidy_data/trials-ihme.csv"
+)
+
+ihme <- read_csv(
+  "../../data/tidy_data/ihme.csv",
+  col_types = cols(ihme_id = col_character(), who_id = col_character())
+)
+
+who <- read_csv(
+  "../../data/tidy_data/who.csv",
+  col_types = cols(ID = col_character())
+)
 ```
 
 
@@ -264,7 +276,7 @@ Join with DALYs.
 treemaps <- 
   trials %>% 
   filter(is_eligible, is_classified) %>%
-  select(nct_id, ihme_level_three, starts_with("n_"), status_june23_sc) %>%
+  select(nct_id, ihme_level_three, starts_with("n_"), status_final_12052020) %>%
   separate_rows(ihme_level_three, sep = "; ") %>%
   right_join(ihme, by = c("ihme_level_three" = "ihme_id")) %>%
   filter(level == "level_three") %>% 
@@ -286,9 +298,9 @@ treemaps %<>%
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
     n_trials = sum(!is.na(n_sample)),  # avoid counting conditions with no trial
-    n_complete_only = sum(str_detect(status_june23_sc, "C"), na.rm = T),
-    n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
-    p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
+    n_complete_only = sum(str_detect(status_final_12052020, "C"), na.rm = T),
+    n_complete_enroll = sum(str_detect(status_final_12052020, "C|E|R"), na.rm = T),
+    p_complete_enroll = mean(str_detect(status_final_12052020, "C|E|R"), na.rm = T)
   ) %>% 
   mutate(complete_enroll = case_when(
     is.na(p_complete_enroll) | is.nan(p_complete_enroll)  ~ NA_character_,
@@ -505,7 +517,7 @@ Join with DALYs.
 treemaps <- 
   trials %>% 
   filter(is_eligible, is_classified) %>%
-  select(nct_id, ihme_level_four, starts_with("n_"), status_june23_sc) %>%
+  select(nct_id, ihme_level_four, starts_with("n_"), status_final_12052020) %>%
   separate_rows(ihme_level_four, sep = "; ") %>%
   right_join(ihme, by = c("ihme_level_four" = "ihme_id")) %>%
   filter(level == "level_four") %>% 
@@ -527,8 +539,8 @@ treemaps %<>%
   summarise(
     sample_size = sum(n_sample_adjust, na.rm = T),
     n_trials = sum(!is.na(n_sample)),  # avoid counting conditions with no trial
-    n_complete_enroll = sum(str_detect(status_june23_sc, "C|E|R"), na.rm = T),
-    p_complete_enroll = mean(str_detect(status_june23_sc, "C|E|R"), na.rm = T)
+    n_complete_enroll = sum(str_detect(status_final_12052020, "C|E|R"), na.rm = T),
+    p_complete_enroll = mean(str_detect(status_final_12052020, "C|E|R"), na.rm = T)
   ) %>% 
   mutate(complete_enroll = case_when(
     is.na(p_complete_enroll) | is.nan(p_complete_enroll)  ~ NA_character_,

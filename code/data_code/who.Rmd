@@ -1,5 +1,5 @@
 ---
-title: 'Pediatric clinical trials: Prepare trial data for analysis'
+title: 'Pediatric clinical trials: Prepare WHO GBD data for analysis'
 author: "Stylianos Serghiou"
 date: '`r format(Sys.time(), "%d/%m/%Y")`'
 output:
@@ -228,233 +228,133 @@ original_theme <- theme_set(my_theme)
 # Load packages
 library(magrittr)
 library(readxl)
-library(tidyverse)
+library(tidyverse)  # load last to avoid masking by others
 
 # Import data
 trials <- read_excel(
   "../../data/master_pediatric-rcts_2021-03-18.xlsx",
   sheet = 1
 )
+
+who <- read_excel(
+  "../../data/master_pediatric-rcts_2021-03-18.xlsx",
+  sheet = 2
+)
 ```
+
 
 
 ***
 
-
-# General
+# Rename columns
 
 ```{r}
-trials %<>%
-  drop_na(nct_id) %>% 
+who %<>% 
   rename(
-    ihmelevel3C_code = `ihmelevel3C _code`
-  ) %>% 
-  select(
-    -`sc_outcome (mortality, co-mortality, composite, non-mortality)`,
-    -`sc_outcome_secondary(mortality, co-mortality, composite, non-mortality)`
+    total_male_dalys = all_age_male,
+    total_female_dalys = all_age_female,
+    total_both_dalys = all_age_both
   )
 ```
 
 
-***
+# Fix DALYs
 
-
-# Eligibility
+Note that the the dashes are of two different types, this is why both were included below.
 
 ```{r}
-trials %<>%
-  mutate(is_eligible = T) %>% 
-  select(nct_id, is_eligible, everything())
+who %<>% 
+  mutate_all(str_replace_all, "·", ".") %>% 
+  mutate_all(str_replace_all, "([0-9]) ([0-9])", "\\1\\2") %>% 
+  mutate_all(na_if, "..") %>% 
+  mutate_all(na_if, "-") %>% 
+  mutate_all(na_if, "−")
 ```
 
 
-***
-
-
-# Classified
-
-Studies that could not be classified into specific disease buckets.
+# Fix data type
 
 ```{r}
-trials %<>% 
-  mutate(is_classified = ihmelevel3A_code != "unclassified") %>%
-  relocate(is_classified, .after = is_eligible)
+who %<>% mutate_at(vars(ID), as.character)
 ```
 
 
-***
+# Create columns
 
-
-# Conditions
-
-Rename appropriately and combine levels into a single column.
+DALYs for males.
 
 ```{r}
-trials %<>%
-  rename(
-    who_level_three = level3_split_categories_sc,
-    who_level_four = level4_split_categories_sc,
-  ) %>%
-  mutate(across(ihmelevel4A_code:ihmelevel4E_code, na_if, "unclassified")) %>% 
-  unite(
-    col = "ihme_level_four", 
-    ihmelevel4A_code:ihmelevel4E_code, 
-    sep = "; ", 
-    na.rm = T
-  ) %>%
-  mutate(across(ihmelevel3A_code:ihmelevel3D_code, na_if, "unclassified")) %>% 
-  unite(
-    col = "ihme_level_three",  
-    ihmelevel3A_code:ihmelevel3D_code, 
-    sep = "; ",
-    na.rm = T
-  ) %>%
-  mutate(across(starts_with("ihme_level_"), na_if, "")) %>% 
-  select(
-    nct_id:is_classified, 
-    who_level_three, who_level_four,
-    ihme_level_three, ihme_level_four,
-    everything()
-  )
+# New column names
+col_names <- c(
+  "total_male_dalys", 
+  "total_male_dalys_lo", 
+  "total_male_dalys_hi"
+)
+
+# Create new columns
+who %<>% 
+  separate(total_male_dalys, into = col_names, sep = " \\(| to ") %>% 
+  mutate_at(vars(total_male_dalys_hi), str_remove, "\\)") %>% 
+  mutate_at(vars(starts_with("total_male")), as.numeric)
 ```
 
 
-***
-
-
-# Sample size
+DALYs for females.
 
 ```{r}
-trials %<>%
-  select(-combined_samplesize, -starts_with("populationsplit")) %>%
-  rename(
-    n_level_three = denominator_level3,
-    n_level_four = denominator_level4
-  ) %>% 
-  mutate(across(starts_with("enroll"), na_if, '0')) %>% 
-  mutate(n_sample = coalesce(
-    enrollment_extracted_publication_sc,
-    enrollment_actual, 
-    enrollment_estimated
-  )) %>%
-  select(nct_id:ihme_level_four, starts_with("n_"), everything())
+# New column names
+col_names <- c(
+  "total_female_dalys", 
+  "total_female_dalys_lo", 
+  "total_female_dalys_hi"
+)
+
+# Create new columns
+who %<>% 
+  separate(total_female_dalys, into = col_names, sep = " \\(| to ") %>% 
+  mutate_at(vars(total_female_dalys_hi), str_remove, "\\)") %>% 
+  mutate_at(vars(starts_with("total_fem")), as.numeric)
 ```
 
 
-***
-
-
-# Country
-
-Create function to act across a dataframe.
+DALYs for both males and females.
 
 ```{r}
-fix_country_df <- function(.data, col) {
-  
-  col <- ensym(col)
-  
-  temp <-
-    .data %>%
-    select(nct_id, region = !!col) %>%
-    mutate_at(
-      vars(region), 
-      stringr::str_replace_all("([a-zA-Z]);([a-zA-Z])", "\\1; \\2")
-    ) %>%
-    separate_rows(region, sep = "; ") %>%
-    mutate_at(vars(region), str_squish) %>%
-    mutate_at(vars(region), stringr::str_remove_all, "_") %>%
-    mutate_at(vars(region), na_if, "notprovided") %>%
-    mutate_at(vars(region), str_remove, ";|\\*") %>%
-    mutate_at(vars(region), str_replace, "United States", "USA") %>%
-    mutate_at(vars(region), str_replace, "Untied States", "USA") %>%
-    mutate_at(vars(region), str_replace, "^United Kin[a-z]+$", "UK") %>%
-    mutate_at(vars(region), str_replace, "^London$", "UK") %>%
-    mutate_at(vars(region), str_replace, "^Cz[a-z]+$", "Czech Republic") %>%
-    mutate_at(vars(region), str_replace, "Hong Kong", "China") %>%
-    mutate_at(vars(region), str_replace, "The Gambia", "Gambia") %>%
-    mutate_at(vars(region), str_replace, "f Congo", "f the Congo") %>%
-    mutate_at(vars(region), str_replace, "Isreal", "Israel") %>%
-    group_by(nct_id) %>%
-    summarise(region = paste(region, collapse = "; "))
-  
-  .data %>%
-    full_join(temp) %>%
-    mutate(!!col := region) %>% 
-    select(-region)
-}
+# New column names
+col_names <- c(
+  "total_both_dalys", 
+  "total_both_dalys_lo", 
+  "total_both_dalys_hi"
+)
+
+# Create new columns
+who %<>% 
+  separate(total_both_dalys, into = col_names, sep = " \\(| to ") %>% 
+  mutate_at(vars(total_both_dalys_hi), str_remove, "\\)") %>% 
+  mutate_at(vars(starts_with("total_both")), as.numeric)
 ```
 
 
-Create function to act across a vector.
+Relative DALYs to total.
 
 ```{r}
-fix_country <- function(x) {
-  
-  x %>%
-    stringr::str_replace_all("([a-zA-Z]);([a-zA-Z])", "\\1; \\2") %>%
-    str_split("; ") %>% 
-    map(stringr::str_squish) %>%
-    map(stringr::str_remove_all, "_") %>%
-    map(na_if, "notprovided") %>%
-    map(str_remove, ";|\\*") %>%
-    map(str_replace, "United States", "USA") %>%
-    map(str_replace, "Untied States", "USA") %>%
-    map(str_replace, "^United Kin[a-z]+$", "UK") %>%
-    map(str_replace, "^London$", "UK") %>%
-    map(str_replace, "^Cz[a-z]+$", "Czech Republic") %>%
-    map(str_replace, "Hong Kong", "China") %>%
-    map(str_replace, "The Gambia", "Gambia") %>%
-    map(str_replace, "f Congo", "f the Congo") %>%
-    map(str_replace, "Isreal", "Israel") %>% 
-    map_chr(paste, collapse = "; ")
-}
+# Total DALYs
+total_dalys <- 
+  who %>% 
+  filter(is.na(level_two)) %>% 
+  pull(total_both_dalys)
+
+# Relative DALYs
+who %<>% 
+  mutate(relative_both_dalys = total_both_dalys / total_dalys) %>% 
+  relocate(relative_both_dalys, .after = total_both_dalys_hi)
 ```
 
 
-Fix country across columns.
+# Glimpse
 
 ```{r}
-trials %<>% mutate(across(starts_with('location_'), fix_country))
-```
-
-
-***
-
-
-# Development
-
-```{r}
-trials %<>%
-  rename(country_income_class = development_status_investigators) %>% 
-  mutate(country_income_class = case_when(
-    country_income_class == "highly_developed" ~ "HIC",
-    country_income_class == "less_developed" ~ "LMIC",
-    country_income_class == "MIXED" ~ "HIC and LMIC",
-    country_income_class == "unavailable" ~ "Unavailable",
-    is.na(country_income_class) ~ NA_character_
-  )) %>% 
-  mutate(is_HIC = case_when(
-    country_income_class == "HIC" ~ T,
-    country_income_class == "LMIC" ~ F,
-    TRUE ~ NA
-  )) %>%
-  select(-starts_with("country_dev")) %>% 
-  select(
-    nct_id, age_category, status_final_12052020,
-    is_eligible:n_sample,
-    country_income_class, is_HIC, 
-    starts_with("location"), everything()
-  )
-```
-
-
-***
-
-
-# Final
-
-```{r}
-glimpse(trials)
+glimpse(who)
 ```
 
 
@@ -464,7 +364,7 @@ glimpse(trials)
 # Save
 
 ```{r save}
-write_csv(trials, "../../data/tidy_data/trials-ihme.csv")
+write_csv(who, "../../data/tidy_data/who.csv")
 ```
 
 

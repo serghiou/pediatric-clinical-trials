@@ -14,7 +14,7 @@
 <meta name="author" content="Stylianos Serghiou" />
 
 
-<title>Pediatric clinical trials: Prepare trial data for analysis</title>
+<title>Pediatric clinical trials: Prepare IHME data for analysis</title>
 
 <script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
 // v0.0.1
@@ -161,7 +161,7 @@ code span.ot { color: #007020; }
 <article class="hentry">
 <header class="header-title">
 <div class="header-title-wrap">
-<h1 class="title toc-ignore entry-title">Pediatric clinical trials: Prepare trial data for analysis</h1>
+<h1 class="title toc-ignore entry-title">Pediatric clinical trials: Prepare IHME data for analysis</h1>
 <h3 class="author">Stylianos Serghiou</h3>
 <h3 class="date">18/03/2021</h3>
 </div><!-- /.header-title-wrap -->
@@ -172,13 +172,9 @@ code span.ot { color: #007020; }
 <div id="TOC" class="toc">
 <ul>
 <li><a href="#setup">Setup</a></li>
-<li><a href="#general">General</a></li>
-<li><a href="#eligibility">Eligibility</a></li>
-<li><a href="#classified">Classified</a></li>
-<li><a href="#conditions">Conditions</a></li>
-<li><a href="#sample-size">Sample size</a></li>
-<li><a href="#country">Country</a></li>
-<li><a href="#development">Development</a></li>
+<li><a href="#level-three">Level three</a></li>
+<li><a href="#level-four">Level four</a></li>
+<li><a href="#join">Join</a></li>
 <li><a href="#final">Final</a></li>
 <li><a href="#save">Save</a></li>
 <li><a href="#documentation">Documentation</a><ul>
@@ -206,232 +202,64 @@ padding: 0 0 0.5em 0
 <span id="cb1-4"><a href="#cb1-4"></a><span class="kw">library</span>(tidyverse)</span>
 <span id="cb1-5"><a href="#cb1-5"></a></span>
 <span id="cb1-6"><a href="#cb1-6"></a><span class="co"># Import data</span></span>
-<span id="cb1-7"><a href="#cb1-7"></a>trials &lt;-<span class="st"> </span><span class="kw">read_excel</span>(</span>
-<span id="cb1-8"><a href="#cb1-8"></a>  <span class="st">&quot;../../data/master_pediatric-rcts_2021-03-18.xlsx&quot;</span>,</span>
-<span id="cb1-9"><a href="#cb1-9"></a>  <span class="dt">sheet =</span> <span class="dv">1</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a>)</span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7"></a>level_three &lt;-<span class="st"> </span><span class="kw">read_excel</span>(</span>
+<span id="cb1-8"><a href="#cb1-8"></a>  <span class="st">&quot;../../data/external_data/ihme-cookbook.xlsx&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9"></a>  <span class="dt">sheet =</span> <span class="st">&quot;Level_three&quot;</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a>)</span>
+<span id="cb1-11"><a href="#cb1-11"></a></span>
+<span id="cb1-12"><a href="#cb1-12"></a>level_four &lt;-<span class="st"> </span><span class="kw">read_excel</span>(</span>
+<span id="cb1-13"><a href="#cb1-13"></a>  <span class="st">&quot;../../data/external_data/ihme-cookbook.xlsx&quot;</span>,</span>
+<span id="cb1-14"><a href="#cb1-14"></a>  <span class="dt">sheet =</span> <span class="st">&quot;Level_four&quot;</span></span>
+<span id="cb1-15"><a href="#cb1-15"></a>)</span></code></pre></div>
 <hr />
 </div>
-<div id="general" class="section level1">
-<h1>General</h1>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>trials <span class="op">%&lt;&gt;%</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="st">  </span><span class="kw">drop_na</span>(nct_id) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="st">  </span><span class="kw">rename</span>(</span>
-<span id="cb2-4"><a href="#cb2-4"></a>    <span class="dt">ihmelevel3C_code =</span> <span class="st">`</span><span class="dt">ihmelevel3C _code</span><span class="st">`</span></span>
-<span id="cb2-5"><a href="#cb2-5"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb2-6"><a href="#cb2-6"></a><span class="st">  </span><span class="kw">select</span>(</span>
-<span id="cb2-7"><a href="#cb2-7"></a>    <span class="op">-</span><span class="st">`</span><span class="dt">sc_outcome (mortality, co-mortality, composite, non-mortality)</span><span class="st">`</span>,</span>
-<span id="cb2-8"><a href="#cb2-8"></a>    <span class="op">-</span><span class="st">`</span><span class="dt">sc_outcome_secondary(mortality, co-mortality, composite, non-mortality)</span><span class="st">`</span></span>
-<span id="cb2-9"><a href="#cb2-9"></a>  )</span></code></pre></div>
+<div id="level-three" class="section level1">
+<h1>Level three</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>level_three <span class="op">%&lt;&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="st">  </span><span class="kw">rename</span>(</span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="dt">ihme_id =</span> IHME_code,</span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="dt">who_id =</span> SC_coding,</span>
+<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">condition =</span> level_three,</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="dt">dalys =</span> DALYS_level3</span>
+<span id="cb2-7"><a href="#cb2-7"></a>  )</span></code></pre></div>
 <hr />
 </div>
-<div id="eligibility" class="section level1">
-<h1>Eligibility</h1>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>trials <span class="op">%&lt;&gt;%</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">is_eligible =</span> T) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="st">  </span><span class="kw">select</span>(nct_id, is_eligible, <span class="kw">everything</span>())</span></code></pre></div>
+<div id="level-four" class="section level1">
+<h1>Level four</h1>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>level_four <span class="op">%&lt;&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="st">  </span><span class="kw">rename</span>(</span>
+<span id="cb3-3"><a href="#cb3-3"></a>    <span class="dt">ihme_id =</span> IHME_code,</span>
+<span id="cb3-4"><a href="#cb3-4"></a>    <span class="dt">who_id =</span> SC_coding,</span>
+<span id="cb3-5"><a href="#cb3-5"></a>    <span class="dt">condition =</span> level_four,</span>
+<span id="cb3-6"><a href="#cb3-6"></a>    <span class="dt">dalys =</span> DALYS_level4</span>
+<span id="cb3-7"><a href="#cb3-7"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="st">`</span><span class="dt">...5</span><span class="st">`</span>)</span></code></pre></div>
 <hr />
 </div>
-<div id="classified" class="section level1">
-<h1>Classified</h1>
-<p>Studies that could not be classified into specific disease buckets.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>trials <span class="op">%&lt;&gt;%</span><span class="st"> </span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">is_classified =</span> ihmelevel3A_code <span class="op">!=</span><span class="st"> &quot;unclassified&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="st">  </span><span class="kw">relocate</span>(is_classified, <span class="dt">.after =</span> is_eligible)</span></code></pre></div>
-<hr />
-</div>
-<div id="conditions" class="section level1">
-<h1>Conditions</h1>
-<p>Rename appropriately and combine levels into a single column.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>trials <span class="op">%&lt;&gt;%</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="st">  </span><span class="kw">rename</span>(</span>
-<span id="cb5-3"><a href="#cb5-3"></a>    <span class="dt">who_level_three =</span> level3_split_categories_sc,</span>
-<span id="cb5-4"><a href="#cb5-4"></a>    <span class="dt">who_level_four =</span> level4_split_categories_sc,</span>
-<span id="cb5-5"><a href="#cb5-5"></a>  ) <span class="op">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="kw">across</span>(ihmelevel4A_code<span class="op">:</span>ihmelevel4E_code, na_if, <span class="st">&quot;unclassified&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb5-7"><a href="#cb5-7"></a><span class="st">  </span><span class="kw">unite</span>(</span>
-<span id="cb5-8"><a href="#cb5-8"></a>    <span class="dt">col =</span> <span class="st">&quot;ihme_level_four&quot;</span>, </span>
-<span id="cb5-9"><a href="#cb5-9"></a>    ihmelevel4A_code<span class="op">:</span>ihmelevel4E_code, </span>
-<span id="cb5-10"><a href="#cb5-10"></a>    <span class="dt">sep =</span> <span class="st">&quot;; &quot;</span>, </span>
-<span id="cb5-11"><a href="#cb5-11"></a>    <span class="dt">na.rm =</span> T</span>
-<span id="cb5-12"><a href="#cb5-12"></a>  ) <span class="op">%&gt;%</span></span>
-<span id="cb5-13"><a href="#cb5-13"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="kw">across</span>(ihmelevel3A_code<span class="op">:</span>ihmelevel3D_code, na_if, <span class="st">&quot;unclassified&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb5-14"><a href="#cb5-14"></a><span class="st">  </span><span class="kw">unite</span>(</span>
-<span id="cb5-15"><a href="#cb5-15"></a>    <span class="dt">col =</span> <span class="st">&quot;ihme_level_three&quot;</span>,  </span>
-<span id="cb5-16"><a href="#cb5-16"></a>    ihmelevel3A_code<span class="op">:</span>ihmelevel3D_code, </span>
-<span id="cb5-17"><a href="#cb5-17"></a>    <span class="dt">sep =</span> <span class="st">&quot;; &quot;</span>,</span>
-<span id="cb5-18"><a href="#cb5-18"></a>    <span class="dt">na.rm =</span> T</span>
-<span id="cb5-19"><a href="#cb5-19"></a>  ) <span class="op">%&gt;%</span></span>
-<span id="cb5-20"><a href="#cb5-20"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="kw">across</span>(<span class="kw">starts_with</span>(<span class="st">&quot;ihme_level_&quot;</span>), na_if, <span class="st">&quot;&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb5-21"><a href="#cb5-21"></a><span class="st">  </span><span class="kw">select</span>(</span>
-<span id="cb5-22"><a href="#cb5-22"></a>    nct_id<span class="op">:</span>is_classified, </span>
-<span id="cb5-23"><a href="#cb5-23"></a>    who_level_three, who_level_four,</span>
-<span id="cb5-24"><a href="#cb5-24"></a>    ihme_level_three, ihme_level_four,</span>
-<span id="cb5-25"><a href="#cb5-25"></a>    <span class="kw">everything</span>()</span>
-<span id="cb5-26"><a href="#cb5-26"></a>  )</span></code></pre></div>
-<hr />
-</div>
-<div id="sample-size" class="section level1">
-<h1>Sample size</h1>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>trials <span class="op">%&lt;&gt;%</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>combined_samplesize, <span class="op">-</span><span class="kw">starts_with</span>(<span class="st">&quot;populationsplit&quot;</span>)) <span class="op">%&gt;%</span></span>
-<span id="cb6-3"><a href="#cb6-3"></a><span class="st">  </span><span class="kw">rename</span>(</span>
-<span id="cb6-4"><a href="#cb6-4"></a>    <span class="dt">n_level_three =</span> denominator_level3,</span>
-<span id="cb6-5"><a href="#cb6-5"></a>    <span class="dt">n_level_four =</span> denominator_level4</span>
-<span id="cb6-6"><a href="#cb6-6"></a>  ) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb6-7"><a href="#cb6-7"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="kw">across</span>(<span class="kw">starts_with</span>(<span class="st">&quot;enroll&quot;</span>), na_if, <span class="st">&#39;0&#39;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb6-8"><a href="#cb6-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n_sample =</span> <span class="kw">coalesce</span>(</span>
-<span id="cb6-9"><a href="#cb6-9"></a>    enrollment_extracted_publication_sc,</span>
-<span id="cb6-10"><a href="#cb6-10"></a>    enrollment_actual, </span>
-<span id="cb6-11"><a href="#cb6-11"></a>    enrollment_estimated</span>
-<span id="cb6-12"><a href="#cb6-12"></a>  )) <span class="op">%&gt;%</span></span>
-<span id="cb6-13"><a href="#cb6-13"></a><span class="st">  </span><span class="kw">select</span>(nct_id<span class="op">:</span>ihme_level_four, <span class="kw">starts_with</span>(<span class="st">&quot;n_&quot;</span>), <span class="kw">everything</span>())</span></code></pre></div>
-<hr />
-</div>
-<div id="country" class="section level1">
-<h1>Country</h1>
-<p>Create function to act across a dataframe.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>fix_country_df &lt;-<span class="st"> </span><span class="cf">function</span>(.data, col) {</span>
-<span id="cb7-2"><a href="#cb7-2"></a>  </span>
-<span id="cb7-3"><a href="#cb7-3"></a>  col &lt;-<span class="st"> </span><span class="kw">ensym</span>(col)</span>
-<span id="cb7-4"><a href="#cb7-4"></a>  </span>
-<span id="cb7-5"><a href="#cb7-5"></a>  temp &lt;-</span>
-<span id="cb7-6"><a href="#cb7-6"></a><span class="st">    </span>.data <span class="op">%&gt;%</span></span>
-<span id="cb7-7"><a href="#cb7-7"></a><span class="st">    </span><span class="kw">select</span>(nct_id, <span class="dt">region =</span> <span class="op">!!</span>col) <span class="op">%&gt;%</span></span>
-<span id="cb7-8"><a href="#cb7-8"></a><span class="st">    </span><span class="kw">mutate_at</span>(</span>
-<span id="cb7-9"><a href="#cb7-9"></a>      <span class="kw">vars</span>(region), </span>
-<span id="cb7-10"><a href="#cb7-10"></a>      stringr<span class="op">::</span><span class="kw">str_replace_all</span>(<span class="st">&quot;([a-zA-Z]);([a-zA-Z])&quot;</span>, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">1; </span><span class="ch">\\</span><span class="st">2&quot;</span>)</span>
-<span id="cb7-11"><a href="#cb7-11"></a>    ) <span class="op">%&gt;%</span></span>
-<span id="cb7-12"><a href="#cb7-12"></a><span class="st">    </span><span class="kw">separate_rows</span>(region, <span class="dt">sep =</span> <span class="st">&quot;; &quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-13"><a href="#cb7-13"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_squish) <span class="op">%&gt;%</span></span>
-<span id="cb7-14"><a href="#cb7-14"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), stringr<span class="op">::</span>str_remove_all, <span class="st">&quot;_&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-15"><a href="#cb7-15"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), na_if, <span class="st">&quot;notprovided&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-16"><a href="#cb7-16"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_remove, <span class="st">&quot;;|</span><span class="ch">\\</span><span class="st">*&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-17"><a href="#cb7-17"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;United States&quot;</span>, <span class="st">&quot;USA&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-18"><a href="#cb7-18"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;Untied States&quot;</span>, <span class="st">&quot;USA&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-19"><a href="#cb7-19"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;^United Kin[a-z]+$&quot;</span>, <span class="st">&quot;UK&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-20"><a href="#cb7-20"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;^London$&quot;</span>, <span class="st">&quot;UK&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-21"><a href="#cb7-21"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;^Cz[a-z]+$&quot;</span>, <span class="st">&quot;Czech Republic&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-22"><a href="#cb7-22"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;Hong Kong&quot;</span>, <span class="st">&quot;China&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-23"><a href="#cb7-23"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;The Gambia&quot;</span>, <span class="st">&quot;Gambia&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-24"><a href="#cb7-24"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;f Congo&quot;</span>, <span class="st">&quot;f the Congo&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-25"><a href="#cb7-25"></a><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(region), str_replace, <span class="st">&quot;Isreal&quot;</span>, <span class="st">&quot;Israel&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb7-26"><a href="#cb7-26"></a><span class="st">    </span><span class="kw">group_by</span>(nct_id) <span class="op">%&gt;%</span></span>
-<span id="cb7-27"><a href="#cb7-27"></a><span class="st">    </span><span class="kw">summarise</span>(<span class="dt">region =</span> <span class="kw">paste</span>(region, <span class="dt">collapse =</span> <span class="st">&quot;; &quot;</span>))</span>
-<span id="cb7-28"><a href="#cb7-28"></a>  </span>
-<span id="cb7-29"><a href="#cb7-29"></a>  .data <span class="op">%&gt;%</span></span>
-<span id="cb7-30"><a href="#cb7-30"></a><span class="st">    </span><span class="kw">full_join</span>(temp) <span class="op">%&gt;%</span></span>
-<span id="cb7-31"><a href="#cb7-31"></a><span class="st">    </span><span class="kw">mutate</span>(<span class="op">!!</span><span class="dt">col :=</span> region) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb7-32"><a href="#cb7-32"></a><span class="st">    </span><span class="kw">select</span>(<span class="op">-</span>region)</span>
-<span id="cb7-33"><a href="#cb7-33"></a>}</span></code></pre></div>
-<p>Create function to act across a vector.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>fix_country &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</span>
-<span id="cb8-2"><a href="#cb8-2"></a>  </span>
-<span id="cb8-3"><a href="#cb8-3"></a>  x <span class="op">%&gt;%</span></span>
-<span id="cb8-4"><a href="#cb8-4"></a><span class="st">    </span>stringr<span class="op">::</span><span class="kw">str_replace_all</span>(<span class="st">&quot;([a-zA-Z]);([a-zA-Z])&quot;</span>, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">1; </span><span class="ch">\\</span><span class="st">2&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-5"><a href="#cb8-5"></a><span class="st">    </span><span class="kw">str_split</span>(<span class="st">&quot;; &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb8-6"><a href="#cb8-6"></a><span class="st">    </span><span class="kw">map</span>(stringr<span class="op">::</span>str_squish) <span class="op">%&gt;%</span></span>
-<span id="cb8-7"><a href="#cb8-7"></a><span class="st">    </span><span class="kw">map</span>(stringr<span class="op">::</span>str_remove_all, <span class="st">&quot;_&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-8"><a href="#cb8-8"></a><span class="st">    </span><span class="kw">map</span>(na_if, <span class="st">&quot;notprovided&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-9"><a href="#cb8-9"></a><span class="st">    </span><span class="kw">map</span>(str_remove, <span class="st">&quot;;|</span><span class="ch">\\</span><span class="st">*&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-10"><a href="#cb8-10"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;United States&quot;</span>, <span class="st">&quot;USA&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-11"><a href="#cb8-11"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;Untied States&quot;</span>, <span class="st">&quot;USA&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-12"><a href="#cb8-12"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;^United Kin[a-z]+$&quot;</span>, <span class="st">&quot;UK&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-13"><a href="#cb8-13"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;^London$&quot;</span>, <span class="st">&quot;UK&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-14"><a href="#cb8-14"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;^Cz[a-z]+$&quot;</span>, <span class="st">&quot;Czech Republic&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-15"><a href="#cb8-15"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;Hong Kong&quot;</span>, <span class="st">&quot;China&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-16"><a href="#cb8-16"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;The Gambia&quot;</span>, <span class="st">&quot;Gambia&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-17"><a href="#cb8-17"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;f Congo&quot;</span>, <span class="st">&quot;f the Congo&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb8-18"><a href="#cb8-18"></a><span class="st">    </span><span class="kw">map</span>(str_replace, <span class="st">&quot;Isreal&quot;</span>, <span class="st">&quot;Israel&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb8-19"><a href="#cb8-19"></a><span class="st">    </span><span class="kw">map_chr</span>(paste, <span class="dt">collapse =</span> <span class="st">&quot;; &quot;</span>)</span>
-<span id="cb8-20"><a href="#cb8-20"></a>}</span></code></pre></div>
-<p>Fix country across columns.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>trials <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="kw">across</span>(<span class="kw">starts_with</span>(<span class="st">&#39;location_&#39;</span>), fix_country))</span></code></pre></div>
-<hr />
-</div>
-<div id="development" class="section level1">
-<h1>Development</h1>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>trials <span class="op">%&lt;&gt;%</span></span>
-<span id="cb10-2"><a href="#cb10-2"></a><span class="st">  </span><span class="kw">rename</span>(<span class="dt">country_income_class =</span> development_status_investigators) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb10-3"><a href="#cb10-3"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">country_income_class =</span> <span class="kw">case_when</span>(</span>
-<span id="cb10-4"><a href="#cb10-4"></a>    country_income_class <span class="op">==</span><span class="st"> &quot;highly_developed&quot;</span> <span class="op">~</span><span class="st"> &quot;HIC&quot;</span>,</span>
-<span id="cb10-5"><a href="#cb10-5"></a>    country_income_class <span class="op">==</span><span class="st"> &quot;less_developed&quot;</span> <span class="op">~</span><span class="st"> &quot;LMIC&quot;</span>,</span>
-<span id="cb10-6"><a href="#cb10-6"></a>    country_income_class <span class="op">==</span><span class="st"> &quot;MIXED&quot;</span> <span class="op">~</span><span class="st"> &quot;HIC and LMIC&quot;</span>,</span>
-<span id="cb10-7"><a href="#cb10-7"></a>    country_income_class <span class="op">==</span><span class="st"> &quot;unavailable&quot;</span> <span class="op">~</span><span class="st"> &quot;Unavailable&quot;</span>,</span>
-<span id="cb10-8"><a href="#cb10-8"></a>    <span class="kw">is.na</span>(country_income_class) <span class="op">~</span><span class="st"> </span><span class="ot">NA_character_</span></span>
-<span id="cb10-9"><a href="#cb10-9"></a>  )) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb10-10"><a href="#cb10-10"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">is_HIC =</span> <span class="kw">case_when</span>(</span>
-<span id="cb10-11"><a href="#cb10-11"></a>    country_income_class <span class="op">==</span><span class="st"> &quot;HIC&quot;</span> <span class="op">~</span><span class="st"> </span>T,</span>
-<span id="cb10-12"><a href="#cb10-12"></a>    country_income_class <span class="op">==</span><span class="st"> &quot;LMIC&quot;</span> <span class="op">~</span><span class="st"> </span>F,</span>
-<span id="cb10-13"><a href="#cb10-13"></a>    <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span><span class="ot">NA</span></span>
-<span id="cb10-14"><a href="#cb10-14"></a>  )) <span class="op">%&gt;%</span></span>
-<span id="cb10-15"><a href="#cb10-15"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="kw">starts_with</span>(<span class="st">&quot;country_dev&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb10-16"><a href="#cb10-16"></a><span class="st">  </span><span class="kw">select</span>(</span>
-<span id="cb10-17"><a href="#cb10-17"></a>    nct_id, age_category, status_final_<span class="dv">12052020</span>,</span>
-<span id="cb10-18"><a href="#cb10-18"></a>    is_eligible<span class="op">:</span>n_sample,</span>
-<span id="cb10-19"><a href="#cb10-19"></a>    country_income_class, is_HIC, </span>
-<span id="cb10-20"><a href="#cb10-20"></a>    <span class="kw">starts_with</span>(<span class="st">&quot;location&quot;</span>), <span class="kw">everything</span>()</span>
-<span id="cb10-21"><a href="#cb10-21"></a>  )</span></code></pre></div>
+<div id="join" class="section level1">
+<h1>Join</h1>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>ihme &lt;-<span class="st"> </span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="st">  </span>level_three <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="st">  </span><span class="kw">bind_rows</span>(level_four, <span class="dt">.id =</span> <span class="st">&quot;level&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">level =</span> <span class="kw">if_else</span>(level <span class="op">==</span><span class="st"> &quot;1&quot;</span>, <span class="st">&quot;level_three&quot;</span>, <span class="st">&quot;level_four&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="st">  </span><span class="kw">select</span>(ihme_id, who_id, level, condition, dalys)</span></code></pre></div>
 <hr />
 </div>
 <div id="final" class="section level1">
 <h1>Final</h1>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">glimpse</span>(trials)</span></code></pre></div>
-<pre><code>Rows: 247
-Columns: 48
-$ nct_id                                 &lt;chr&gt; &quot;NCT01182532&quot;, &quot;NCT02362906&quot;, …
-$ age_category                           &lt;chr&gt; &quot;&lt;5; 5-14&quot;, &quot;&lt;5; 5-14&quot;, &quot;&lt;5&quot;, …
-$ status_final_12052020                  &lt;chr&gt; &quot;Completed&quot;, &quot;Unknown status&quot;,…
-$ is_eligible                            &lt;lgl&gt; TRUE, TRUE, TRUE, TRUE, TRUE, …
-$ is_classified                          &lt;lgl&gt; TRUE, TRUE, TRUE, TRUE, TRUE, …
-$ who_level_three                        &lt;chr&gt; &quot;58&quot;, &quot;16&quot;, &quot;76&quot;, &quot;197&quot;, &quot;241&quot;…
-$ who_level_four                         &lt;chr&gt; &quot;75&quot;, &quot;22&quot;, &quot;88&quot;, &quot;203&quot;, &quot;242&quot;…
-$ ihme_level_three                       &lt;chr&gt; &quot;961&quot;, &quot;956&quot;, &quot;962&quot;, &quot;542&quot;, &quot;6…
-$ ihme_level_four                        &lt;chr&gt; &quot;408&quot;, &quot;322&quot;, &quot;380&quot;, &quot;972&quot;, &quot;6…
-$ n_level_four                           &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-$ n_level_three                          &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-$ n_sample                               &lt;dbl&gt; 3000, 1500, 4760, 1653, 2418, …
-$ country_income_class                   &lt;chr&gt; &quot;LMIC&quot;, &quot;LMIC&quot;, &quot;LMIC&quot;, &quot;HIC&quot;,…
-$ is_HIC                                 &lt;lgl&gt; FALSE, FALSE, FALSE, TRUE, TRU…
-$ location_participants                  &lt;chr&gt; &quot;China&quot;, &quot;China&quot;, &quot;Uganda&quot;, &quot;U…
-$ location_investigator                  &lt;chr&gt; &quot;China&quot;, &quot;China&quot;, &quot;Uganda&quot;, &quot;U…
-$ location_collaborators                 &lt;chr&gt; &quot;China&quot;, &quot;China&quot;, &quot;Uganda&quot;, &quot;N…
-$ location_sponsors                      &lt;chr&gt; &quot;China&quot;, &quot;China&quot;, &quot;Uganda; Nor…
-$ brief_title                            &lt;chr&gt; &quot;A Clinical Trial to Evaluate …
-$ brief_summary                          &lt;chr&gt; &quot;The study is aimed to evaluat…
-$ official_title                         &lt;chr&gt; NA, &quot;Assessing the Effectivene…
-$ condition                              &lt;chr&gt; &quot;Hand, Foot and Mouth Disease&quot;…
-$ multi_site_participants                &lt;chr&gt; &quot;y&quot;, &quot;y&quot;, &quot;y&quot;, &quot;y&quot;, &quot;y&quot;, &quot;y&quot;, …
-$ multi_country_participants             &lt;chr&gt; &quot;y&quot;, &quot;y&quot;, &quot;y&quot;, &quot;y&quot;, &quot;y&quot;, &quot;y&quot;, …
-$ development_status_participants        &lt;chr&gt; &quot;less_developed&quot;, &quot;less_develo…
-$ multi_country_investigators            &lt;chr&gt; &quot;n&quot;, &quot;n&quot;, &quot;n&quot;, &quot;n&quot;, &quot;n&quot;, &quot;n&quot;, …
-$ multi_site_investigators               &lt;chr&gt; &quot;n&quot;, &quot;n&quot;, &quot;n&quot;, &quot;y&quot;, &quot;n&quot;, &quot;n&quot;, …
-$ collaborator_affiliation               &lt;chr&gt; &quot;Beijing University of Chinese…
-$ funding_sources                        &lt;chr&gt; NA, NA, &quot;Globvac, Research Cou…
-$ funding_categorized_sc                 &lt;chr&gt; &quot;notavailable&quot;, &quot;notavailable&quot;…
-$ main_citation                          &lt;chr&gt; NA, NA, NA, &quot;Winner P, Farkas …
-$ `first_mainpublished_date_7/1/2020_sc` &lt;dttm&gt; NA, NA, NA, 2016-06-22, 2015-…
-$ number_publications                    &lt;dbl&gt; 0.0, 0.0, 0.0, 1.0, 1.0, 2.0, …
-$ protocolpublished_date_sc              &lt;dttm&gt; NA, NA, 2017-07-12, NA, NA, N…
-$ number_protocol                        &lt;dbl&gt; NA, NA, 1, NA, NA, NA, 1, NA, …
-$ enrollment_estimated                   &lt;dbl&gt; 3000, 1500, 4760, 1653, 2418, …
-$ enrollment_actual                      &lt;dbl&gt; 3000, NA, NA, 1653, 2418, 1024…
-$ enrollment_extracted_publication_sc    &lt;dbl&gt; NA, NA, NA, 1653, 2418, 512, 1…
-$ intervention_type                      &lt;chr&gt; &quot;Other; Drug; Other&quot;, &quot;Drug; D…
-$ intervention_name                      &lt;chr&gt; &quot;Western therapy; TCM Syndrome…
-$ intervention                           &lt;chr&gt; &quot;traditional medicine&quot;, &quot;tradi…
-$ prevention_treatment                   &lt;chr&gt; &quot;Treatment&quot;, &quot;Treatment&quot;, &quot;Pre…
-$ primary_outcome_stelios                &lt;chr&gt; &quot;time to onset; time of body t…
-$ secondary_outcome_stelios              &lt;chr&gt; &quot;time of symptom disappearance…
-$ start_date                             &lt;dttm&gt; 2010-05-01, 2014-04-01, 2016-…
-$ registration_date                      &lt;dttm&gt; 2010-08-16, 2015-01-22, 2015-…
-$ completion_date                        &lt;chr&gt; &quot;40878&quot;, &quot;42217&quot;, &quot;44166&quot;, &quot;41…
-$ last_update                            &lt;dttm&gt; 1899-12-31, NA, 2020-03-25, N…</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">glimpse</span>(ihme)</span></code></pre></div>
+<pre><code>Rows: 191
+Columns: 5
+$ ihme_id   &lt;dbl&gt; 491, 508, 974, 526, 957, 955, 962, 558, 626, 344, 410, 542,…
+$ who_id    &lt;dbl&gt; 147, 168, 230, 178, 25, 3, 76, 207, 269, 32, 100, 197, 94, …
+$ level     &lt;chr&gt; &quot;level_three&quot;, &quot;level_three&quot;, &quot;level_three&quot;, &quot;level_three&quot;,…
+$ condition &lt;chr&gt; &quot;Cardiovascular diseases&quot;, &quot;Chronic respiratory diseases&quot;, …
+$ dalys     &lt;dbl&gt; 4.42e+06, 5.66e+06, 2.45e+06, 6.75e+06, 6.37e+07, 2.03e+07,…</code></pre>
 <hr />
 </div>
 <div id="save" class="section level1">
 <h1>Save</h1>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw">write_csv</span>(trials, <span class="st">&quot;../../data/tidy_data/trials-ihme.csv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">write_csv</span>(ihme, <span class="st">&quot;../../data/tidy_data/ihme.csv&quot;</span>)</span></code></pre></div>
 <hr />
 </div>
 <div id="documentation" class="section level1 tabset">
