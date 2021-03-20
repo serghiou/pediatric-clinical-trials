@@ -232,7 +232,7 @@ library(tidyverse)
 
 # Import data
 trials <- read_excel(
-  "../../data/master_pediatric-rcts_2021-03-18.xlsx",
+  "../../data/master_pediatric-rcts_2021-03-19.xlsx",
   sheet = 1
 )
 ```
@@ -425,7 +425,7 @@ trials %<>% mutate(across(starts_with('location_'), fix_country))
 
 ```{r}
 trials %<>%
-  rename(country_income_class = development_status_investigators) %>% 
+  rename(country_income_class = development_status_participants) %>% 
   mutate(country_income_class = case_when(
     country_income_class == "highly_developed" ~ "HIC",
     country_income_class == "less_developed" ~ "LMIC",
@@ -440,10 +440,10 @@ trials %<>%
   )) %>%
   select(-starts_with("country_dev")) %>% 
   select(
-    nct_id, age_category, status_final_12052020,
+    nct_id, age_category, condition, status_final_12052020,
     is_eligible:n_sample,
     country_income_class, is_HIC, 
-    starts_with("location"), everything()
+    starts_with("location")
   )
 ```
 
